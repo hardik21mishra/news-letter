@@ -2,13 +2,8 @@ name: Daily News Newsletter
 
 on:
   schedule:
-    # Runs at 8:00 AM UTC every day.
-    # NOTE: this is UTC time, not your local time - adjust the hour
-    # to match when you want it in your own timezone.
     - cron: "30 2 * * *"
   workflow_dispatch:
-    # This adds a manual "Run workflow" button on GitHub,
-    # so you can test it immediately without waiting for the schedule.
 
 jobs:
   send-newsletter:
