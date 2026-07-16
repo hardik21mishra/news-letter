@@ -17,26 +17,19 @@ def load_subscribers():
         return [line.strip() for line in f.readlines() if line.strip()]
 
 
-def build_html_body(articles):
-    """Builds one HTML-formatted digest from all processed articles."""
-    html = "<html><body>"
-    html += "<h2 style='color:#2c3e50;'>Your Daily News Digest</h2>"
+def build_body(articles):
+    text = "Your Daily News Digest\n\n"
 
     for article in articles:
         if article["category"] is None or article["summary"] is None:
             continue
 
-        html += f"""
-        <div style="margin-bottom:20px; padding:10px; border-left:4px solid #3498db;">
-            <h3 style="margin:0;">{article['title']}</h3>
-            <p style="color:#888; font-size:12px;">{article['category']}</p>
-            <p>{article['summary']}</p>
-            <a href="{article['link']}" style="color:#3498db;">Read more &rarr;</a>
-        </div>
-        """
+        text += article["title"] + "\n"
+        text += "Category: " + article["category"] + "\n"
+        text += article["summary"] + "\n"
+        text += "Read more: " + article["link"] + "\n\n"
 
-    html += "</body></html>"
-    return html
+    return text
 
 
 def send_to_all_subscribers(html_body):
@@ -46,7 +39,7 @@ def send_to_all_subscribers(html_body):
     if not subscribers:
         return
 
-    msg = MIMEText(html_body, "html")
+    msg = MIMEText(body)
     msg["Subject"] = "Your Daily News Digest"
     msg["From"] = SENDER_EMAIL
 
@@ -65,6 +58,6 @@ if __name__ == "__main__":
         print("WARNING: SENDER_EMAIL or EMAIL_APP_PASSWORD not set in environment.")
     else:
         articles = the_news()
-        html_body = build_html_body(articles)
-        send_to_all_subscribers(html_body)
+        body = build_body(articles)
+        send_to_all_subscribers(body)
         print("Newsletter run complete.")
