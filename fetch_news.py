@@ -19,11 +19,12 @@ def fetch_news():
                 "title": entry.get("title", "nahi mila Title"),
                 "description": entry.get("summary", "nahi mila Description"),
                 "published_date": entry.get("published", "nahi mili date"),
+                "link": entry.get("link", ""),
                 "category": None,
                 "summary": None
             }
             # print(article["title"])
             articles.append(article)
-    return articles
+    return articles 
 
 # fetch_news()

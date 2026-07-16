@@ -5,8 +5,7 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def process_news(articles):
     if not os.getenv("GROQ_API_KEY"):
-        print("GROQ API KEY NAHI MIL RAHI "
-              "SAB KHATAM HO JAYEGA AB TOH")
+        print("GROQ API KEY NAHI MIL RAHI ")
 
     for index, article in enumerate(articles, start=1):
 
