@@ -5,7 +5,7 @@
     "published_date": "Sun, 19 Jul 2026 23:53:59 GMT",
     "link": "https://www.bbc.co.uk/news/articles/cr7knml2y99o?at_medium=RSS&at_campaign=rss",
     "category": "Politics",
-    "summary": "Former mayor Chris Mason has taken on the role of Prime Minister, making him the fifth in four years, and aims to break the trend of frequent leadership changes. He plans to maintain his leadership style, which he successfully implemented in Manchester."
+    "summary": "Chris Mason reports on the new Prime Minister, Burnham, who is the fifth leader in four years, and his plans to break the trend of frequent leadership changes. Burnham, a former mayor, aims to maintain his leadership style from Manchester."
   },
   {
     "title": "Victory for football? Spain beat Argentina to win World Cup",
@@ -13,23 +13,31 @@
     "published_date": "Mon, 20 Jul 2026 00:28:50 GMT",
     "link": "https://www.bbc.co.uk/sport/football/articles/cdx8veqllw7o?at_medium=RSS&at_campaign=rss",
     "category": "Sports",
-    "summary": "Spain won the World Cup by beating Argentina in the final, with the victory being widely celebrated by fans. The match was a highly anticipated event, and the outcome was met with little disagreement. The World Cup is an international football tournament."
+    "summary": "Spain won the World Cup by beating Argentina in the final, with the victory being widely celebrated. The match was a highly anticipated event, and the outcome was met with little disagreement. The World Cup is an international football tournament."
   },
   {
     "title": "Moment fans in Madrid celebrate World Cup win",
     "description": "Thousands of spectators watched Spain's victory in central Madrid on late Sunday night.",
     "published_date": "Sun, 19 Jul 2026 23:48:36 GMT",
     "link": "https://www.bbc.co.uk/news/videos/cgr701xrg14o?at_medium=RSS&at_campaign=rss",
-    "category": "Sports",
-    "summary": "Thousands of fans in Madrid celebrated Spain's World Cup win on Sunday night, with many spectators gathering in the city's central area to watch the match. The victory marked a significant moment for Spanish football enthusiasts. The atmosphere was lively as fans cheered and celebrated the team's success."
+    "category": "World",
+    "summary": "Thousands of fans in Madrid celebrated Spain's World Cup win on Sunday night, with thousands of spectators gathering in the city to watch the victory. The atmosphere was electric as the team secured their championship title."
   },
   {
-    "title": "US soldier killed and one injured after Iranian attack in Iraq",
-    "description": "The US military reports another death a day after two of its soldiers were killed in Jordan.",
-    "published_date": "Sun, 19 Jul 2026 19:45:12 GMT",
-    "link": "https://www.bbc.co.uk/news/articles/cgk417jp83po?at_medium=RSS&at_campaign=rss",
-    "category": "World",
-    "summary": "A US soldier was killed and another injured in an Iranian attack in Iraq, following a previous incident in Jordan where two US soldiers were killed. The US military has reported another death in a separate incident. The situation remains tense in the region."
+    "title": "Broadcaster and journalist Edward Stourton dies aged 68",
+    "description": "Stourton hosted Radio 4's Today programme for a decade and was a founding member of Channel 4 News.",
+    "published_date": "Mon, 20 Jul 2026 07:30:13 GMT",
+    "link": "https://www.bbc.co.uk/news/articles/c20d4j4v9g9o?at_medium=RSS&at_campaign=rss",
+    "category": "Entertainment",
+    "summary": "Edward Stourton, a well-known British broadcaster and journalist, has passed away at the age of 68. He had a long career in journalism, hosting Radio 4's Today programme and being a founding member of Channel 4 News."
+  },
+  {
+    "title": "Trump says US strikes hit Iran in 'honour' of American soldiers killed",
+    "description": "Iran responded with attacks in Syria and Jordan, as two ships reportedly exploded in the Strait of Hormuz.",
+    "published_date": "Mon, 20 Jul 2026 06:31:55 GMT",
+    "link": "https://www.bbc.co.uk/news/articles/cly52xzjd3qo?at_medium=RSS&at_campaign=rss",
+    "category": "Politics",
+    "summary": "US strikes in Iran were carried out in honor of American soldiers killed, leading to retaliatory attacks in Syria and Jordan, and explosions in the Strait of Hormuz."
   },
   {
     "title": "My fitness tracker knew I was pregnant before I did",
@@ -45,23 +53,15 @@
     "published_date": "Mon, 20 Jul 2026 00:19:12 GMT",
     "link": "https://www.bbc.co.uk/news/articles/cr7k5ngde3vo?at_medium=RSS&at_campaign=rss",
     "category": "World",
-    "summary": "Ukraine is struggling to recruit soldiers, with recruitment officers facing violent aggression from those who are hesitant or unwilling to join the military. This has become a pressing concern for the country, which is currently involved in a conflict. The situation has led to a sense of fear and desperation among those responsible for recruitment."
+    "summary": "In Ukraine, the struggle to recruit soldiers has turned violent, with recruitment officers facing aggressive threats, according to police. The situation has become increasingly tense, with many people reportedly afraid to join the military."
   },
   {
-    "title": "Fire crews battling blaze on Arthur\u2019s Seat in Edinburgh",
+    "title": "Fire crews battle blaze on Arthur\u2019s Seat in Edinburgh",
     "description": "A huge plume of smoke could be seen from as far away as Fife on Sunday evening.",
-    "published_date": "Sun, 19 Jul 2026 20:49:32 GMT",
+    "published_date": "Mon, 20 Jul 2026 07:21:45 GMT",
     "link": "https://www.bbc.co.uk/news/articles/cr59mqnm081o?at_medium=RSS&at_campaign=rss",
     "category": "World",
-    "summary": "Fire crews are battling a blaze on Arthur's Seat in Edinburgh, with a large plume of smoke visible from Fife. The incident occurred on Sunday evening. The exact cause of the fire is not specified."
-  },
-  {
-    "title": "The 1975's Matty Healy marries model Gabbriette Bechtel in Los Angeles",
-    "description": "The newlyweds were first linked in 2023 after Healy's brief relationship with Taylor Swift.",
-    "published_date": "Sun, 19 Jul 2026 14:50:11 GMT",
-    "link": "https://www.bbc.co.uk/news/articles/c5ywxp2d826o?at_medium=RSS&at_campaign=rss",
-    "category": "Entertainment",
-    "summary": "Matty Healy, lead singer of the British rock band The 1975, has married model Gabbriette Bechtel in Los Angeles. The couple was first linked in 2023, following Healy's brief relationship with Taylor Swift. The marriage marks a new chapter in Healy's personal life."
+    "summary": "Fire crews battled a blaze on Arthur's Seat in Edinburgh, with smoke visible from as far away as Fife on Sunday evening. The exact cause of the fire is not specified in the article. The incident drew attention from nearby residents."
   },
   {
     "title": "Russia launches major ballistic missile attack on Ukrainian cities",
@@ -77,6 +77,6 @@
     "published_date": "Sun, 19 Jul 2026 18:35:16 GMT",
     "link": "https://www.bbc.co.uk/news/articles/cx278ed09nzo?at_medium=RSS&at_campaign=rss",
     "category": "Business",
-    "summary": "Thames Water's lenders are preparing to take legal action if the UK government nationalizes the company, seeking full payment of its outstanding debts, which are estimated to be in the multi-billions of pounds. This move is a response to the potential nationalization of the company. The exact amount of debt is not specified."
+    "summary": "Thames Water's lenders are preparing to take legal action if the UK government decides to nationalize the company, seeking full payment of their outstanding debts, which are estimated to be in the multi-billions of pounds."
   }
 ]
