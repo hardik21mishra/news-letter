@@ -1,10 +1,10 @@
 import feedparser
 
 feed_links = [
+    "https://www.theguardian.com/world/rss", 
     "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
     "https://feeds.bbci.co.uk/news/rss.xml",
     "https://www.aljazeera.com/xml/rss/all.xml",
-    "https://www.theguardian.com/world/rss", 
 ]
 
 
