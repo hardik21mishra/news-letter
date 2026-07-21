@@ -25,7 +25,6 @@ def build_body(articles):
         text += "Category: " + article["category"] + "\n"
         text += article["summary"] + "\n"
         text += "Read more: " + article["link"] + "\n\n"
-
     return text
 
 def send_to_all_subscribers(body):
@@ -49,9 +48,9 @@ def send_to_all_subscribers(body):
 
 if __name__ == "__main__":
     if not SENDER_EMAIL or not APP_PASSWORD:
-        print("WARNING: SENDER_EMAIL or EMAIL_APP_PASSWORD not set in environment.")
+        print("SENDER_EMAIL or EMAIL_APP_PASSWORD not set in environment")
     else:
         articles = the_news()
         body = build_body(articles)
         send_to_all_subscribers(body)
-        print("Newsletter run complete.")
+        print("Newsletter Project Run completed")
