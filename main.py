@@ -5,14 +5,11 @@ app = FastAPI()
 
 @app.get("/")
 def home():
-    return {"message": "Hello, this is my news API!"}
+    return {"message": "Hello, this is my news API"}
   
-@app.get("/news")
+@app.get("/news") #endpoint
 def get_news(category: str = None):
-    articles = the_news()
- 
+    articles = the_news() 
     if category:
-        articles = [a for a in articles if a["category"] == category]
- 
+        articles = [a for a in articles if a["category"] == category] 
     return articles
- 
