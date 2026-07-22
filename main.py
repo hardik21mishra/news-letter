@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app import the_news
- 
+
 app = FastAPI()
 
 @app.get("/")
