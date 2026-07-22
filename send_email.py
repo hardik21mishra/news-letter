@@ -2,6 +2,7 @@ from app import the_news
 import os
 import smtplib
 from email.mime.text import MIMEText
+from db import get_all_subscribers
 
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
@@ -29,7 +30,7 @@ def build_body(articles):
 
 def send_to_all_subscribers(body):
     """Sends the same HTML digest to every email in subscribers.txt."""
-    subscribers = load_subscribers()
+    subscribers = get_all_subscribers()
 
     if not subscribers:
         return
@@ -42,6 +43,8 @@ def send_to_all_subscribers(body):
         server.starttls()
         server.login(SENDER_EMAIL, APP_PASSWORD)
         for email in subscribers:
+            if "To" in msg:
+                del msg["To"]
             msg["To"] = email
             server.sendmail(SENDER_EMAIL, email, msg.as_string())
             print(f"Sent to {email}")
