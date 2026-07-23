@@ -9,7 +9,7 @@ def save_to_json(articles):
 
 def the_news():
     articles = fetch_news()
-    articles = articles[:10]
+    articles = articles[:30]
     processed_articles = process_news(articles)
     save_to_json(processed_articles)
     return processed_articles
