@@ -2,3 +2,4 @@ feedparser
 groq
 fastapi
 uvicorn
+pydantic[email]
