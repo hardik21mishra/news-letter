@@ -1,12 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
 from app import the_news
-from db import init_db, add_subscriber, subscriber_count
 
 app = FastAPI()
 
-init_db()  # runs once when the server starts, creates the table if needed
- 
+SUBSCRIBERS_FILE = "subscribers.txt"
  
 class SubscribeRequest(BaseModel):
     email: EmailStr
@@ -24,11 +22,16 @@ def get_news(category: str = None):
 
 @app.post("/subscribe")
 def subscribe(request: SubscribeRequest):
-    added = add_subscriber(request.email)
-    if not added:
-        raise HTTPException(status_code=400, detail="Email is already subscribed")
+    email = request.email
+ 
+    existing = []
+    with open(SUBSCRIBERS_FILE, "r") as f:
+        existing = [line.strip() for line in f.readlines() if line.strip()]
     
-    return {
-        "message": f"{request.email} subscribed successfully",
-        "total_subscribers": subscriber_count()
-    }
+    if email in existing:
+        raise HTTPException(status_code=400, detail="Email is already subscribed")
+ 
+    with open(SUBSCRIBERS_FILE, "a") as f:
+        f.write(email + "\n")
+ 
+    return {f"{email} subscribed successfully"}

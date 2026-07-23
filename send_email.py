@@ -2,11 +2,17 @@ from app import the_news
 import os
 import smtplib
 from email.mime.text import MIMEText
-from db import init_db, get_all_subscribers
-from datetime import datetime
 
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
+SUBSCRIBERS_FILE = "subscribers.txt"
+
+def load_subscribers():
+    if not os.path.exists(SUBSCRIBERS_FILE):
+        print("No subscribers.txt found - no one to send to.")
+        return []
+    with open(SUBSCRIBERS_FILE, "r") as f:
+        return [line.strip() for line in f.readlines() if line.strip()]
 
 CATEGORY_COLORS = {
     "Politics": "#5B6C8F",
@@ -89,7 +95,7 @@ def build_body(articles):
     return html
 
 def send_to_all_subscribers(body):
-    subscribers = get_all_subscribers()
+    subscribers = load_subscribers()
 
     if not subscribers:
         print("no subscribers availalele")
@@ -110,7 +116,6 @@ def send_to_all_subscribers(body):
             print(f"Sent to {email}")
 
 if __name__ == "__main__":
-    init_db()
     if not SENDER_EMAIL or not APP_PASSWORD:
         print("mail/passoword not set in environment")
     else:
