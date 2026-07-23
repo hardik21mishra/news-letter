@@ -1,82 +1,162 @@
 [
   {
-    "title": "Inside Andy Burnham\u2019s 1st Day as U.K. Prime Minister",
-    "description": "As Andy Burnham became Britain\u2019s seventh leader in a decade on Monday, he tried to show that he will govern differently.",
-    "published_date": "Mon, 20 Jul 2026 19:35:10 +0000",
-    "link": "https://www.nytimes.com/2026/07/20/world/europe/andy-burnham-uk.html",
-    "category": "Politics",
-    "summary": "Andy Burnham became the new Prime Minister of the U.K., marking a change in leadership, and he aimed to demonstrate a different approach to governance on his first day in office."
-  },
-  {
-    "title": "Andy Burnham, New UK Prime Minister, Names John Healey As Top Finance Official",
-    "description": "As chancellor, John Healey, who quit as defense secretary in the former government, will fill one of the most consequential posts, overseeing fiscal and economic policy.",
-    "published_date": "Mon, 20 Jul 2026 18:57:41 +0000",
-    "link": "https://www.nytimes.com/2026/07/20/business/andy-burnham-john-healey.html",
-    "category": "Politics",
-    "summary": "Andy Burnham has been named as the new UK Prime Minister and has appointed John Healey as his top finance official, with Healey taking on the role of chancellor. Healey previously served as defense secretary in the former government. He will oversee fiscal and economic policy."
-  },
-  {
-    "title": "G.O.P. Boxed In on Iran War as Trump Sidelines Congress",
-    "description": "Republicans now face a worst-case political scenario of being asked to fund an unpopular war over which they have exercised little oversight.",
-    "published_date": "Mon, 20 Jul 2026 21:30:11 +0000",
-    "link": "https://www.nytimes.com/2026/07/20/us/politics/gop-trump-iran-war.html",
-    "category": "Politics",
-    "summary": "Republicans are facing a difficult situation as they may be asked to fund an unpopular war in Iran without having much control over the decision, a scenario that could be politically challenging for them. This comes as former President Trump has taken a step back from involving Congress in the matter."
-  },
-  {
-    "title": "Trump to Impose 50% Tariff on Many Canadian Goods",
-    "description": "The administration will use an untested legal provision to put significant duties on Canadian exports, reigniting a clash with one of America\u2019s biggest trading partners.",
-    "published_date": "Tue, 21 Jul 2026 00:25:52 +0000",
-    "link": "https://www.nytimes.com/2026/07/20/business/economy/trump-tariffs-canada.html",
-    "category": "Business",
-    "summary": "The US administration plans to impose a 50% tariff on many Canadian goods, using an untested legal provision, which is expected to reignite a trade clash with Canada. This move is likely to impact Canadian exports to the US. The exact details of the affected goods are not specified."
-  },
-  {
-    "title": "Trump Rejected Nearly 6,000 Clemency Applications Amid Hope of Pardon Wave",
-    "description": "Expectations were raised for a raft of pardons in connection with the country\u2019s 250th birthday but the president granted fewer than 20 on July 3.",
-    "published_date": "Tue, 21 Jul 2026 02:58:49 +0000",
-    "link": "https://www.nytimes.com/2026/07/20/us/politics/trump-rejected-clemency-applications.html",
-    "category": "Politics",
-    "summary": "US President Trump rejected nearly 6,000 clemency applications, despite initial hopes for a large-scale pardon wave, particularly around the country's 250th birthday. Only a small number of pardons were granted on July 3. The high number of rejected applications has sparked interest in the president's clemency process."
-  },
-  {
-    "title": "Who's in Andy Burnham's cabinet?",
-    "description": "An in-depth look at which Labour MPs have been appointed to cabinet roles by new Prime Minister Andy Burnham",
-    "published_date": "Mon, 20 Jul 2026 23:16:54 GMT",
-    "link": "https://www.bbc.co.uk/news/articles/ckg4we9g58do?at_medium=RSS&at_campaign=rss",
-    "category": "Politics",
-    "summary": "New Prime Minister Andy Burnham has appointed Labour MPs to cabinet roles, but the article does not specify the details of these appointments. The article promises an in-depth look at the cabinet, but the actual content is not provided."
-  },
-  {
-    "title": "Trump slaps 50% tariffs on Canada and Carney vows to 'intensify' trade talks",
-    "description": "The duties mark a major escalation in trade tensions between the North American neighbours.",
-    "published_date": "Tue, 21 Jul 2026 00:34:47 GMT",
-    "link": "https://www.bbc.co.uk/news/articles/cg4dzq3x3e1o?at_medium=RSS&at_campaign=rss",
-    "category": "Politics",
-    "summary": "US President Trump has imposed 50% tariffs on Canada, escalating trade tensions between the two North American neighbors. Canadian Prime Minister Carney has vowed to \"intensify\" trade talks in response. The move is a significant escalation in their trade dispute."
-  },
-  {
-    "title": "US launches fresh strikes on Iran, as Trump warns of retaliation for deaths of soldiers",
-    "description": "The US says the attacks were aimed at degrading Iran's capabilities to attack ships in the Strait of Hormuz.",
-    "published_date": "Tue, 21 Jul 2026 02:41:28 GMT",
-    "link": "https://www.bbc.co.uk/news/articles/cx25wg2x26do?at_medium=RSS&at_campaign=rss",
-    "category": "Politics",
-    "summary": "The US has launched fresh strikes on Iran, targeting the country's capabilities to attack ships in the Strait of Hormuz. The move comes after President Trump warned of retaliation for the deaths of US soldiers. The strikes are a significant escalation in the ongoing tensions between the two nations."
-  },
-  {
-    "title": "Man, 28, charged with murder of Ann Widdecombe",
-    "description": "Joshua Kerry from Rotherham will appear at Westminster Magistrates' Court on Tuesday.",
-    "published_date": "Mon, 20 Jul 2026 19:02:04 GMT",
-    "link": "https://www.bbc.co.uk/news/articles/cn4n2erympvo?at_medium=RSS&at_campaign=rss",
-    "category": "Politics",
-    "summary": "A 28-year-old man, Joshua Kerry, has been charged with the murder of Ann Widdecombe, although it is unclear which Ann Widdecombe is being referred to in the article. The man is set to appear in court on Tuesday."
-  },
-  {
-    "title": "At least 27 dead and 83 missing after passenger ferry capsizes off Guyana",
-    "description": "An investigation into the tragedy has been launched, the island's prime minister says, adding he hopes more will be found alive.",
-    "published_date": "Tue, 21 Jul 2026 02:07:48 GMT",
-    "link": "https://www.bbc.co.uk/news/articles/cm2gm99nrm7o?at_medium=RSS&at_campaign=rss",
+    "title": "What Visuals Show About Recent Damage to U.S. Military Sites in the Middle East",
+    "description": "Video footage and satellite images reveal new details about Iranian strikes on U.S. targets during the latest flare-up in fighting.",
+    "published_date": "Thu, 23 Jul 2026 01:37:39 +0000",
+    "link": "https://www.nytimes.com/2026/07/22/world/middleeast/iran-war-us-bases-images.html",
     "category": "World",
-    "summary": "A passenger ferry capsized off the coast of Guyana, resulting in at least 27 deaths and 83 people missing. An investigation has been launched into the tragedy. The prime minister of Guyana expressed hope that more survivors will be found."
+    "summary": "Recent video footage and satellite images have revealed new details about Iranian strikes on U.S. targets in the Middle East, providing visual evidence of the damage. The footage and images show the extent of the attacks, which occurred during a recent flare-up in fighting."
+  },
+  {
+    "title": "House Adopts $95 Billion G.O.P. Budget for Iran War",
+    "description": "Republican leaders muscled through resistance in their own ranks to approve the budget blueprint for the war and other measures, but its prospects were far dimmer in the Senate.",
+    "published_date": "Wed, 22 Jul 2026 21:56:01 +0000",
+    "link": "https://www.nytimes.com/2026/07/22/us/politics/house-republicans-iran-budget-pentagon.html",
+    "category": "Politics",
+    "summary": "The US House of Representatives has adopted a $95 billion budget for the war in Iran, despite resistance from some Republican leaders. The budget blueprint still faces uncertain prospects in the Senate. The move is part of the Republican party's efforts to authorize the war."
+  },
+  {
+    "title": "Houthis Claim Strikes on 2 Saudi Oil Tankers in Red Sea",
+    "description": "The Saudi authorities confirmed a strike on one of the ships. These are the first claimed attacks since the Iranian-backed Yemeni group announced a blockade on Saudi Arabia.",
+    "published_date": "Thu, 23 Jul 2026 02:59:44 +0000",
+    "link": "https://www.nytimes.com/2026/07/22/world/middleeast/houthis-saudi-oil-tankers-red-sea.html",
+    "category": "World",
+    "summary": "The Houthi group in Yemen has claimed responsibility for strikes on two Saudi oil tankers in the Red Sea, marking the first such attacks since they announced a blockade on Saudi Arabia. The Saudi authorities have confirmed a strike on one of the ships. The incident has raised concerns about regional tensions."
+  },
+  {
+    "title": "With Saudi Deal, Trump Loosens Nuclear Standards for One Close Ally",
+    "description": "Nuclear experts say it throws fuel on the smoldering fire of atomic proliferation, creating a destabilizing situation that could raise the risk of nuclear war.",
+    "published_date": "Wed, 22 Jul 2026 23:05:44 +0000",
+    "link": "https://www.nytimes.com/2026/07/22/us/politics/trump-saudi-nuclear-standards.html",
+    "category": "Politics",
+    "summary": "The US has relaxed nuclear standards for Saudi Arabia, a move that nuclear experts fear could lead to atomic proliferation and increase the risk of nuclear war. This decision has sparked concerns about the destabilizing impact on global security. The move is seen as a significant shift in US nuclear policy."
+  },
+  {
+    "title": "Coveted U.S. Nuclear Deal Is a Coup for Saudi Crown Prince",
+    "description": "Saudi Arabia has for years sought a deal to obtain American nuclear technology. The agreement, signed on Wednesday, could deepen U.S.-Saudi ties for decades to come.",
+    "published_date": "Wed, 22 Jul 2026 20:54:10 +0000",
+    "link": "https://www.nytimes.com/2026/07/22/world/middleeast/us-saudi-arabia-nuclear-deal.html",
+    "category": "Politics",
+    "summary": "Saudi Arabia has secured a deal with the US to obtain American nuclear technology, potentially strengthening ties between the two countries for decades. The agreement was signed on Wednesday, marking a significant development in Saudi Arabia's long-standing pursuit of nuclear technology."
+  },
+  {
+    "title": "US signs landmark nuclear deal with Saudi Arabia",
+    "description": "The US Department of Energy says the \"peaceful\" co-operation agreement will give US firms \"great access\" to the Saudi nuclear energy programme.",
+    "published_date": "Thu, 23 Jul 2026 00:21:53 GMT",
+    "link": "https://www.bbc.co.uk/news/articles/cj03r59z73po?at_medium=RSS&at_campaign=rss",
+    "category": "Politics",
+    "summary": "The US Department of Energy has signed a landmark nuclear deal with Saudi Arabia, granting US firms access to the country's nuclear energy program for peaceful cooperation. The agreement aims to promote cooperation in the field of nuclear energy."
+  },
+  {
+    "title": "Houthis claim attack on oil tankers as US launches more strikes on Iran",
+    "description": "The Houthi attacks would be the first in the Red Sea since the Iran-backed group announced a \"maritime embargo\" against Saudi Arabia.",
+    "published_date": "Thu, 23 Jul 2026 03:48:27 GMT",
+    "link": "https://www.bbc.co.uk/news/articles/cpw9xzx9r4ko?at_medium=RSS&at_campaign=rss",
+    "category": "World",
+    "summary": "The Houthi group has claimed an attack on oil tankers in the Red Sea, while the US has launched more strikes on Iran. This comes after the Houthi group announced a \"maritime embargo\" against Saudi Arabia. The situation remains tense in the region."
+  },
+  {
+    "title": "'What was their crime?': BBC visits Iran school where strike killed 120 children",
+    "description": "Nearly five months on, grief is still raw as a teacher and a mother recall the horror of the attack in Minab.",
+    "published_date": "Thu, 23 Jul 2026 04:49:24 GMT",
+    "link": "https://www.bbc.co.uk/news/articles/cewrx0ldlkko?at_medium=RSS&at_campaign=rss",
+    "category": "World",
+    "summary": "The BBC visited a school in Iran where a strike killed 120 children, nearly five months after the incident, and spoke to a teacher and a mother who witnessed the tragedy. The event is still a source of grief for the community. The details of the attack remain unclear."
+  },
+  {
+    "title": "PC Harper's widow criticises early prisoner release plan as Burnham to review scheme",
+    "description": "Lissie Harper says the possible early release of prisoners is \"deplorable\", after reports that two of PC Harper's killers could be freed early.",
+    "published_date": "Wed, 22 Jul 2026 15:43:55 GMT",
+    "link": "https://www.bbc.co.uk/news/articles/c0ejwedl1gno?at_medium=RSS&at_campaign=rss",
+    "category": "Politics",
+    "summary": "PC Harper's widow has expressed criticism over a plan to release prisoners early, specifically mentioning the potential release of two individuals who killed her husband. This comes as Greater Manchester Mayor Andy Burnham is set to review the scheme."
+  },
+  {
+    "title": "Hope for thousands of MS patients as 'life-changing' drug now on NHS in England",
+    "description": "Fampridine boosts nerve signals to make it easier to walk, with up to 5,000 eligible.",
+    "published_date": "Wed, 22 Jul 2026 23:38:58 GMT",
+    "link": "https://www.bbc.co.uk/news/articles/cgmkygjk9g2o?at_medium=RSS&at_campaign=rss",
+    "category": "Health",
+    "summary": "A new drug called Fampridine has been approved for use on the NHS in England, offering hope to thousands of patients with multiple sclerosis. The medication helps boost nerve signals, making it easier for patients to walk. Approximately 5,000 patients are eligible for the treatment."
+  },
+  {
+    "title": "Guyana ferry disaster: families demand answers as around 100 feared dead",
+    "description": "Officials say 76 of the roughly 179 people believed to have been aboard survived, and 53 bodies have been found so far.",
+    "published_date": "Thu, 23 Jul 2026 04:17:22 +0000",
+    "link": "https://www.aljazeera.com/news/2026/7/23/guyana-ferry-disaster-families-demand-answers-as-around-100-feared-dead?traffic_source=rss",
+    "category": "World",
+    "summary": "A ferry disaster in Guyana has resulted in the deaths of at least 53 people, with around 100 feared dead, and officials are working to determine the cause of the tragedy. The incident has left families demanding answers. Many survivors have been rescued, but the full extent of the damage is still being assessed."
+  },
+  {
+    "title": "Jailed opposition leader Ghannouchi faints in Tunisian prison due to heat",
+    "description": "The incident was witnessed by the daughter of Ahmed Nejib Chebbi, another prominent political prisoner.",
+    "published_date": "Thu, 23 Jul 2026 03:53:36 +0000",
+    "link": "https://www.aljazeera.com/news/2026/7/23/jailed-opposition-leader-ghannouchi-faints-in-tunisian-prison-due-to-heat?traffic_source=rss",
+    "category": "Politics",
+    "summary": "A jailed opposition leader, Ghannouchi, fainted in a Tunisian prison due to heat, with the incident witnessed by another prominent political prisoner's daughter. The exact circumstances and Ghannouchi's current condition are not specified in the report. This incident highlights the treatment of political prisoners in Tunisian prisons."
+  },
+  {
+    "title": "Five soldiers killed in southern Thailand checkpoint attack",
+    "description": "The assault in Narathiwat comes a day after a car bombing elsewhere in the province wounded a police officer.",
+    "published_date": "Thu, 23 Jul 2026 03:53:05 +0000",
+    "link": "https://www.aljazeera.com/news/2026/7/23/five-soldiers-killed-in-southern-thailand-checkpoint-attack?traffic_source=rss",
+    "category": "World",
+    "summary": "A checkpoint attack in southern Thailand resulted in the deaths of five soldiers, following a car bombing in the same province that injured a police officer the previous day. The incident highlights ongoing security concerns in the region. The situation remains tense in Narathiwat province."
+  },
+  {
+    "title": "Calls for Moroccan rapper\u2019s release outside a Casablanca court",
+    "description": "Protesters gathered outside a court in Casablanca, Morocco to demand the release of Moroccan rapper Mehdi El Youbi.",
+    "published_date": "Thu, 23 Jul 2026 03:42:41 +0000",
+    "link": "https://www.aljazeera.com/video/newsfeed/2026/7/23/calls-for-moroccan-rappers-release-outside-a-casablanca-court?traffic_source=rss",
+    "category": "World",
+    "summary": "Protesters gathered outside a court in Casablanca, Morocco to demand the release of Moroccan rapper Mehdi El Youbi, highlighting a growing concern for the rapper's freedom. The event suggests a strong public reaction to the rapper's situation. The exact circumstances of El Youbi's detention are not specified in the article."
+  },
+  {
+    "title": "Armed attackers kill more than 20 in northwest Nigeria",
+    "description": "The attacks reflect a surge in violence as armed gangs continue raiding villages in northwest and central Nigeria.",
+    "published_date": "Thu, 23 Jul 2026 03:21:00 +0000",
+    "link": "https://www.aljazeera.com/news/2026/7/23/armed-attackers-kill-more-than-20-in-northwest-nigeria?traffic_source=rss",
+    "category": "World",
+    "summary": "Armed attackers have killed more than 20 people in northwest Nigeria, as part of a surge in violence in the region. The attacks involve armed gangs raiding villages in northwest and central Nigeria. The situation is becoming increasingly dire."
+  },
+  {
+    "title": "Health worker monitored for Ebola in London hospital after working in DRC",
+    "description": "<p>UK resident was evacuated from Democratic Republic of the Congo where there is an outbreak of the disease</p><p>A humanitarian worker is being monitored at a specialist hospital in London after potential exposure to the Ebola virus.</p><p>The UK resident was medically evacuated from the Democratic Republic of the Congo (DRC) where the worker had been treating patients with the disease, the UK Health Security Agency (UKHSA) said.</p> <a href=\"https://www.theguardian.com/world/2026/jul/21/health-worker-being-monitored-for-ebola-in-london-hospital-after-working-in-drc\">Continue reading...</a>",
+    "published_date": "Tue, 21 Jul 2026 22:39:00 GMT",
+    "link": "https://www.theguardian.com/world/2026/jul/21/health-worker-being-monitored-for-ebola-in-london-hospital-after-working-in-drc",
+    "category": "Health",
+    "summary": "A UK resident who worked in the Democratic Republic of the Congo is being monitored for Ebola in a London hospital after being medically evacuated due to potential exposure to the virus. The individual was treating patients with the disease before being brought back to the UK. The UK Health Security Agency is overseeing the situation."
+  },
+  {
+    "title": "Healthy diet too expensive for one in three people globally, UN report finds",
+    "description": "<p>Global hunger declined for the third year in a row in 2025 but experts call for action to bring down costs of fruit, vegetables and dairy as report shows 2.69bn people can\u2019t afford to eat well</p><p>One in three people cannot afford to eat a healthy diet, a new report has found, prompting calls for urgent action on food affordability.</p><p>There are 2.69 billion people unable to afford a diverse diet that meets their energy and nutrient needs, and it will take \u201cimmense\u201d amounts of work to achieve <a href=\"https://www.un.org/sustainabledevelopment/hunger/\">the global target of zero hunger </a>by 2030, the annual report from five UN agencies warned.</p> <a href=\"https://www.theguardian.com/global-development/2026/jul/21/healthy-diet-too-expensive-for-one-in-three-people-globally-un-report-finds\">Continue reading...</a>",
+    "published_date": "Tue, 21 Jul 2026 10:00:42 GMT",
+    "link": "https://www.theguardian.com/global-development/2026/jul/21/healthy-diet-too-expensive-for-one-in-three-people-globally-un-report-finds",
+    "category": "Health",
+    "summary": "A new UN report found that one in three people globally cannot afford a healthy diet, with 2.69 billion people unable to afford a diverse diet that meets their energy and nutrient needs. This highlights the need for urgent action on food affordability to achieve the global target of zero hunger by 2030."
+  },
+  {
+    "title": "S\u00e3o Tom\u00e9 and Pr\u00edncipe heads to polls in tense presidential election",
+    "description": "<p>Incumbent Carlos Vila Nova hopes to defeat his former party and secure second term as independent</p><p>Voters in <a href=\"https://www.theguardian.com/world/sao-tome-and-principe\">S\u00e3o Tom\u00e9 and Pr\u00edncipe</a> go to the polls for a presidential election on Sunday as one of Africa\u2019s least populous countries seeks to burnish its democratic credentials.</p><p>According to the National Election Commission, about 142,000 people are registered to vote in the tiny African state\u2019s elections, approximately 15% of whom live in the diaspora.</p> <a href=\"https://www.theguardian.com/world/2026/jul/19/sao-tome-and-principe-presidential-election\">Continue reading...</a>",
+    "published_date": "Sun, 19 Jul 2026 04:00:16 GMT",
+    "link": "https://www.theguardian.com/world/2026/jul/19/sao-tome-and-principe-presidential-election",
+    "category": "World",
+    "summary": "Voters in S\u00e3o Tom\u00e9 and Pr\u00edncipe are heading to the polls for a presidential election, with incumbent Carlos Vila Nova seeking a second term as an independent candidate. The election is seen as an opportunity for the tiny African country to demonstrate its democratic credentials. Approximately 142,000 people are registered to vote."
+  },
+  {
+    "title": "\u2018We are preserving a tradition\u2019: how Ghana\u2019s sensationalist film posters became collectible art",
+    "description": "<p>Hand-painted works are often wildly unfaithful to the movies they portray \u2013 reinterpretations that sometimes resulted in threats, insults and even physical attacks from viewers who felt duped</p><p>Sitting on his porch in Teshie near Accra, Heavy J dipped a brush into red oil paint and dabbed it carefully on to his canvas \u2013 a flour sack \u2013 adding blood to a knife being wielded by a man. Higher on the canvas, he had started on an outline of a skull.</p><p>Heavy J was creating a poster, but not as you might have expected for a horror film. Instead, it was for the animated fairytale The Little Mermaid. The man with the knife was not a killer but the film\u2019s kind-hearted prince, Eric. The skull was also unrelated to the story. \u201cWe add more to make people interested,\u201d said Heavy J, whose real name is Jeaurs Affutu.</p> <a href=\"https://www.theguardian.com/world/2026/jul/18/ghana-sensationalist-film-posters-collectible-art\">Continue reading...</a>",
+    "published_date": "Sat, 18 Jul 2026 04:00:47 GMT",
+    "link": "https://www.theguardian.com/world/2026/jul/18/ghana-sensationalist-film-posters-collectible-art",
+    "category": "World",
+    "summary": "In Ghana, film posters are being created as works of art, often deviating from the actual movie storylines, and have become collectible items. These posters are hand-painted and can be wildly unfaithful to the movies they portray. The artists behind these posters see them as a way to preserve a tradition."
+  },
+  {
+    "title": "Seven Americans quarantining at Kenya Ebola facility after US travel ban, says aid group",
+    "description": "<p>Aid workers are first known people to quarantine at facility, which sparked huge opposition in Kenya </p><p>Seven American aid workers who had been in Congo to fight the Ebola outbreak are quarantining at a new isolation facility in \u2060Kenya after the US government introduced travel \u2060restrictions, the head of a US charity \u200bemploying them told Reuters.</p><p>The aid workers are the first known people to quarantine at the facility, which has sparked huge opposition in Kenya and is at the heart of a legal case in which a court has ordered the work to be \u2060suspended. Construction continued, however, according to US officials and satellite imagery reviewed by Reuters.</p> <a href=\"https://www.theguardian.com/us-news/2026/jul/17/ebola-us-aid-workers-kenya\">Continue reading...</a>",
+    "published_date": "Fri, 17 Jul 2026 12:17:14 GMT",
+    "link": "https://www.theguardian.com/us-news/2026/jul/17/ebola-us-aid-workers-kenya",
+    "category": "Health",
+    "summary": "Seven American aid workers who were in Congo to fight the Ebola outbreak are quarantining at a facility in Kenya after the US government introduced travel restrictions. This move has sparked opposition in Kenya, where a court has ordered the work to be suspended. The aid workers are the first known people to quarantine at the facility."
   }
 ]

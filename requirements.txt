@@ -1,2 +1,4 @@
 feedparser
 groq
+fastapi
+uvicorn
