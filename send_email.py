@@ -12,6 +12,7 @@ def load_subscribers():
         print("No subscribers.txt found - no one to send to.")
         return []
     with open(SUBSCRIBERS_FILE, "r") as f:
+        # print("subscribers loaded successfully") #
         return [line.strip() for line in f.readlines() if line.strip()]
 
 CATEGORY_COLORS = {
@@ -78,7 +79,7 @@ def build_body(articles):
   {intro}
 </td></tr>
  
-{blocks}
+{blocks} 
  
 <tr><td style="background-color:#F7F8FA; padding:28px 40px; border-top:1px solid #DDE2E8;" align="center">
   <div style="font-family:Arial, Helvetica, sans-serif; font-size:12px; color:#8A93A3; line-height:1.6;">
