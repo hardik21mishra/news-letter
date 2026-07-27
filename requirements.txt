@@ -3,3 +3,4 @@ groq
 fastapi
 uvicorn
 pydantic[email]
+apscheduler

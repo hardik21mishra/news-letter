@@ -38,8 +38,13 @@ def build_article_block(article):
     <td style="padding:24px 0 24px 20px;">
       <div style="font-family:Arial, Helvetica, sans-serif; font-size:11px; letter-spacing:2px; color:{color}; text-transform:uppercase; font-weight:bold;">{article['category']}</div>
       <div style="font-family:Georgia, 'Times New Roman', serif; font-size:19px; color:#16202A; font-weight:bold; margin-top:6px; line-height:1.3;">{article['title']}</div>
-      <div style="font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#4A5361; margin-top:10px; line-height:1.55;">{article['summary']}</div>
-      <div style="margin-top:12px;">
+    <div style="font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#4A5361; margin-top:10px; line-height:1.55;">{article['summary']}</div>
+
+    <div style="font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#8A93A3; margin-top:10px;">
+    <strong>Source:</strong> {article['source']}
+    </div>
+
+    <div style="margin-top:12px;">
         <a href="{article['link']}" style="font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#C08829; text-decoration:none; font-weight:bold; border-bottom:1px solid #C08829; padding-bottom:1px;">Read the full story &rarr;</a>
       </div>
     </td>
@@ -84,7 +89,7 @@ def build_body(articles):
 <tr><td style="background-color:#F7F8FA; padding:28px 40px; border-top:1px solid #DDE2E8;" align="center">
   <div style="font-family:Arial, Helvetica, sans-serif; font-size:12px; color:#8A93A3; line-height:1.6;">
     You're receiving this because you subscribed to The Daily Brief.<br>
-    Curated automatically, delivered every morning.
+    Curated automatically, delivered every morning. Curated automatically 
   </div>
 </td></tr>
  
