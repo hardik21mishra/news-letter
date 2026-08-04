@@ -83,10 +83,9 @@ News Description:
 
     return articles
 
-articles = process_news(articles)
 
-from to_excel import export_to_excel
+# from to_excel import export_to_excel
 
-file_name = export_to_excel(articles)
+# file_name = export_to_excel(summarized_articles)
 
-print("\nNews saved successfully to", file_name)
+# print("\nNews saved successfully to", file_name)

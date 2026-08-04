@@ -98,7 +98,11 @@ def fetch_news():
             description = (
                 entry.get("summary")
                 or entry.get("description")
-                or (entry.get("content", [{}])[0].get("value", "") if entry.get("content") else "")
+                or (
+                    entry.get("content", [{}])[0].get("value", "") 
+                    if entry.get("content") 
+                    else ""
+                )
             )
 
             article = {
@@ -121,6 +125,26 @@ def fetch_news():
 
     return articles
 
+# main
+
+def fetch_sum_save():
+    from categorize import process_news
+    from db import init_db, save_articles
+
+    init_db() 
+
+    articles = fetch_news()
+    print(f"Fetched {len(articles)} articles total")
+
+
+    print("Categorized and summarized articles")
+
+    articles = process_news(articles)
+    save_articles(articles)
+    print("saved articles to the database")
+
+if __name__ == "__main__":
+    fetch_sum_save()
 # fetch_news()
 
 # with open("expp", "w", encoding="utf-8") as f:
