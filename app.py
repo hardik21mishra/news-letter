@@ -3,7 +3,7 @@ from categorize import process_news
 import json 
 
 def save_to_json(articles):
-    with open("news.json", "w") as f:
+    with open("GitHub_Actions_news.json", "w") as f:
         json.dump(articles, f, indent = 2)
     print("saved articles to news.json")
 

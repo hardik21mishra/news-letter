@@ -1,114 +1,81 @@
-from app import the_news
 import os
 import smtplib
+import openpyxl
 from email.mime.text import MIMEText
+from datetime import datetime
 
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 SUBSCRIBERS_FILE = "subscribers.txt"
+EXCEL_FILE = "tech_top_news.xlsx"
 
 def load_subscribers():
     if not os.path.exists(SUBSCRIBERS_FILE):
         print("No subscribers.txt found - no one to send to.")
         return []
     with open(SUBSCRIBERS_FILE, "r") as f:
-        # print("subscribers loaded successfully") #
         return [line.strip() for line in f.readlines() if line.strip()]
 
-CATEGORY_COLORS = {
-    "Politics": "#5B6C8F",
-    "Technology": "#3E7C6B",
-    "Sports": "#4F7942",
-    "Business": "#8A6D3B",
-    "World": "#7A5C4F",
-    "Entertainment": "#8F5B7C",
-    "Health": "#4F7C8A",
-    "Science": "#5B7C8F",
-    "Other": "#6B6B6B",
-}
-DEFAULT_COLOR = "#6B6B6B"
+def read_sheet_as_dicts(ws):
+    rows = list(ws.iter_rows(values_only=True))
+    headers = rows[0]
+    return [dict(zip(headers, row)) for row in rows[1:] if any(row)]
 
-def build_article_block(article):
-    color = CATEGORY_COLORS.get(article["category"], DEFAULT_COLOR)
-    return f"""
-<tr><td style="padding:0 40px;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-  <tr>
-    <td width="4" style="background-color:{color};"></td>
-    <td style="padding:24px 0 24px 20px;">
-      <div style="font-family:Arial, Helvetica, sans-serif; font-size:11px; letter-spacing:2px; color:{color}; text-transform:uppercase; font-weight:bold;">{article['category']}</div>
-      <div style="font-family:Georgia, 'Times New Roman', serif; font-size:19px; color:#16202A; font-weight:bold; margin-top:6px; line-height:1.3;">{article['title']}</div>
-    <div style="font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#4A5361; margin-top:10px; line-height:1.55;">{article['summary']}</div>
-
-    <div style="font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#8A93A3; margin-top:10px;">
-    <strong>Source:</strong> {article['source']}
-    </div>
-
-    <div style="margin-top:12px;">
-        <a href="{article['link']}" style="font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#C08829; text-decoration:none; font-weight:bold; border-bottom:1px solid #C08829; padding-bottom:1px;">Read the full story &rarr;</a>
-      </div>
-    </td>
-  </tr>
-  </table>
-</td></tr>
-<tr><td style="padding:0 40px;"><div style="border-top:1px solid #EEF1F5;"></div></td></tr>
-"""
- 
-
-def build_body(articles):
-    from datetime import datetime
+def build_news_body(articles):
     dateline = datetime.now().strftime("%A, %B %d, %Y").upper()
- 
-    blocks = ""
+    lines = [f"THE DAILY BRIEF - {dateline}", ""]
     count = 0
-    for article in articles:
-        if article["category"] is None or article["summary"] is None:
+    for a in articles:
+        if not a.get("Title"):
             continue
-        blocks += build_article_block(article)
+        lines.append(a.get("Title", ""))
+        lines.append(f"Source: {a.get('Source', '')} | {a.get('Published date', '')}")
+        lines.append(a.get("Description", ""))
+        lines.append("-" * 40)
         count += 1
- 
-    intro = "Stories worth your morning coffee." if count else "No stories today - check back tomorrow."
- 
-    html = f"""
-<html><body style="margin:0; padding:0; background-color:#EEF1F5;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#EEF1F5; padding:32px 0;">
-<tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF; border:1px solid #DDE2E8;">
- 
-<tr><td style="background-color:#16202A; padding:36px 40px 28px 40px;" align="center">
-  <div style="font-family:Georgia, 'Times New Roman', serif; font-size:30px; letter-spacing:2px; color:#FFFFFF; text-transform:uppercase;">The Daily Brief</div>
-  <div style="font-family:Georgia, 'Times New Roman', serif; font-size:12px; letter-spacing:3px; color:#C08829; text-transform:uppercase; margin-top:8px;">{dateline}</div>
-</td></tr>
- 
-<tr><td style="padding:24px 40px 8px 40px; font-family:Georgia, 'Times New Roman', serif; font-size:14px; color:#4A5361; font-style:italic; border-bottom:1px solid #EEF1F5;">
-  {intro}
-</td></tr>
- 
-{blocks} 
- 
-<tr><td style="background-color:#F7F8FA; padding:28px 40px; border-top:1px solid #DDE2E8;" align="center">
-  <div style="font-family:Arial, Helvetica, sans-serif; font-size:12px; color:#8A93A3; line-height:1.6;">
-    You're receiving this because you subscribed to The Daily Brief.<br>
-    Curated automatically, delivered every morning. Curated automatically 
-  </div>
-</td></tr>
- 
-</table>
-</td></tr>
-</table>
-</body></html>
-"""
-    return html
+    if count == 0:
+        lines.append("No stories today - check back tomorrow.")
+    return "\n".join(lines)
 
-def send_to_all_subscribers(body):
+
+def build_tech_of_week_body(pick):
+    return (
+        f"TECH OF THE WEEK\n\n"
+        f"{pick.get('Title', '')}\n\n"
+        f"{pick.get('Description', '')}\n\n"
+        f"Why it matters: {pick.get('Why it matters', '')}\n\n"
+        f"Link: {pick.get('Link', '')}"
+    )
+
+
+def build_paper_of_week_body(pick):
+    return (
+        f"PAPER OF THE WEEK\n\n"
+        f"{pick.get('Title', '')}\n"
+        f"Authors: {pick.get('Authors', '')}\n\n"
+        f"{pick.get('Description', '')}\n\n"
+        f"Link: {pick.get('Link', '')}"
+    )
+
+
+def build_topic_of_week_body(pick):
+    return (
+        f"TOPIC OF THE WEEK\n\n"
+        f"{pick.get('Title', '')}\n\n"
+        f"{pick.get('Explanation', '')}\n\n"
+        f"Link: {pick.get('Link', '')}"
+    )
+
+
+def send_to_all_subscribers(subject, body):
     subscribers = load_subscribers()
 
     if not subscribers:
-        print("no subscribers availalele")
+        print("no subscribers available")
         return
 
-    msg = MIMEText(body, "html")
-    msg["Subject"] = "Your Daily News Brief"
+    msg = MIMEText(body)  # plain text, no "html" subtype -- no design, just content
+    msg["Subject"] = subject
     msg["From"] = SENDER_EMAIL
 
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
@@ -119,13 +86,28 @@ def send_to_all_subscribers(body):
                 del msg["To"]
             msg["To"] = email
             server.sendmail(SENDER_EMAIL, email, msg.as_string())
-            print(f"Sent to {email}")
+            print(f"Sent '{subject}' to {email}")
+
 
 if __name__ == "__main__":
     if not SENDER_EMAIL or not APP_PASSWORD:
-        print("mail/passoword not set in environment")
+        print("mail/password not set in environment")
     else:
-        articles = the_news()
-        body = build_body(articles)
-        send_to_all_subscribers(body)
+        wb = openpyxl.load_workbook(EXCEL_FILE)
+
+        news_articles = read_sheet_as_dicts(wb["Sheet1"])
+        tech_pick = read_sheet_as_dicts(wb["Tech of the Week"])[0]
+        paper_pick = read_sheet_as_dicts(wb["Paper of the Week"])[0]
+        topic_pick = read_sheet_as_dicts(wb["Topic of the Week"])[0]
+
+        mails = [
+            ("Your Daily News Brief", build_news_body(news_articles)),
+            (f"Tech of the Week: {tech_pick.get('Title', '')}", build_tech_of_week_body(tech_pick)),
+            (f"Paper of the Week: {paper_pick.get('Title', '')}", build_paper_of_week_body(paper_pick)),
+            (f"Topic of the Week: {topic_pick.get('Title', '')}", build_topic_of_week_body(topic_pick)),
+        ]
+
+        for subject, body in mails:
+            send_to_all_subscribers(subject, body)
+
         print("Newsletter Project Run completed")

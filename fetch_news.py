@@ -1,35 +1,127 @@
 import feedparser
+from bs4 import BeautifulSoup
+import re
+import html
+import json
 
 feed_links = {
-    "https://www.theguardian.com/world/rss" : "The Guardian", 
-    "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml" : "New York Times",
-    "https://feeds.bbci.co.uk/news/rss.xml" : "BBC",
-    "https://www.aljazeera.com/xml/rss/all.xml" : "Al Jazeera",
-    "https://abcnews.go.com/abcnews/topstories" : "ABC News"
+    "https://www.infoq.com/feed/": "InfoQ",
+    "https://martinfowler.com/feed.atom": "Martin Fowler",
+    "https://queue.acm.org/rss/": "ACM Queue",
+    "https://lwn.net/headlines/rss": "LWN.net",
+    "https://netflixtechblog.com/feed": "Netflix TechBlog",
+    "https://blog.cloudflare.com/rss/": "Cloudflare Blog",
+    "https://code.fb.com/feed/": "Meta Engineering",
+    "https://github.blog/feed/": "GitHub Blog",
+    "https://aws.amazon.com/blogs/aws/feed/": "AWS",
+    "https://cloud.google.com/blog/products/rss/": "Google Cloud",
+
+    "https://www.cncf.io/feed/": "CNCF",
+    "https://kubernetes.io/feed.xml": "Kubernetes",
+    "https://istio.io/latest/feed.xml": "Istio",
+    "https://www.hashicorp.com/blog/feed.xml": "HashiCorp",
+    "https://grafana.com/blog/rss/": "Grafana Labs",
+    "https://prometheus.io/feed.xml": "Prometheus",
+    "https://www.elastic.co/blog/feed": "Elastic",
+    "https://helm.sh/feed.xml": "Helm",
+    "https://developer.nvidia.com/blog/feed": "NVIDIA",
+    "https://thenewstack.io/feed/": "The New Stack",
+
+    "https://openai.com/news/rss.xml": "OpenAI",
+    "https://huggingface.co/blog/feed.xml": "Hugging Face",
+    "https://research.google/blog/rss/": "Google Research",
+    "https://blogs.microsoft.com/ai/feed/": "Microsoft AI",
+    "https://www.anthropic.com/news/rss.xml": "Anthropic",
+    "https://pytorch.org/feed.xml": "PyTorch",
+    "https://www.tensorflow.org/feed.xml": "TensorFlow",
+    "https://engineering.fb.com/category/ai/feed/": "Meta AI Engineering",
+
+    "https://www.cockroachlabs.com/blog/rss.xml": "CockroachDB",
+    "https://www.timescale.com/blog/rss/": "TimescaleDB",
+    "https://planet.postgresql.org/rss20.xml": "Planet PostgreSQL",
+    "https://redis.com/feed/": "Redis",
+    "https://www.mongodb.com/blog/rss": "MongoDB",
+
+    "https://googleprojectzero.blogspot.com/feeds/posts/default": "Google Project Zero",
+    "https://feeds.feedburner.com/TheHackersNews": "The Hacker News",
+    "https://unit42.paloaltonetworks.com/feed/": "Palo Alto Unit 42",
+    "https://blog.talosintelligence.com/feeds/posts/default": "Cisco Talos",
+    "https://www.schneier.com/feed/atom/": "Schneier on Security",
+    "https://go.dev/blog/feed.atom": "Go Blog",
+    "https://blog.rust-lang.org/feed.xml": "Rust Blog",
+    "https://v8.dev/blog.atom": "V8 JavaScript Engine",
+    "https://developer.chrome.com/feed.xml": "Chrome Developers",
+    "https://webkit.org/feed/": "WebKit",
+    "https://blog.jetbrains.com/feed/": "JetBrains Blog",
+    "https://planet.kernel.org/rss20.xml": "Planet Kernel",
+    "https://planet.python.org/rss20.xml": "Planet Python",
+
+    "https://engineering.linkedin.com/blog.rss.html": "LinkedIn Engineering",
+    "https://dropbox.tech/feed": "Dropbox Tech",
+    "https://stripe.com/blog/feed.rss": "Stripe Engineering",
+    "https://engineering.atspotify.com/feed/": "Spotify Engineering",
+    "https://www.datadoghq.com/blog/rss/": "Datadog Engineering",
+    "https://engineering.salesforce.com/feed/": "Salesforce Engineering",
+    "https://www.twilio.com/en-us/blog/rss.xml": "Twilio Engineering",
+
+    "https://feeds.arstechnica.com/arstechnica/index": "Ars Technica",
+    "https://rss.slashdot.org/Slashdot/slashdotMain": "Slashdot",
 }
+
+
+def clean_text(text):
+    if not text:
+        return "Description not found"
+
+    text = html.unescape(text)
+    text = BeautifulSoup(text, "html.parser").get_text(" ")
+    text = re.sub(r'[\u200b-\u200d\uFEFF]', '', text)  # zero-width chars
+
+    text = text.replace("\n", " ").replace("\r", " ").replace("\t", " ")
+
+    # strip all quote marks (straight + curly) instead of converting them,
+    text = re.sub(r'["“”‘’]', '', text)
+
+    text = re.sub(r'\s+([.,!?;:])', r'\1', text)      # no space before punctuation
+    text = re.sub(r'([.,!?;:])([A-Za-z])', r'\1 \2', text)  # space after punctuation
+    text = re.sub(r'([.!?]){2,}', r'\1', text)         # remove repeated punctuation
+    text = re.sub(r'\s+', ' ', text)                  #remove whitespace
+
+    return text.strip()
+
 
 def fetch_news():
     articles = []
-        #   (x,y)
     for feed_url, source in feed_links.items():
         feed = feedparser.parse(feed_url)
-        # print(feed)
+        for entry in feed.entries[:1]:
+            description = (
+                entry.get("summary")
+                or entry.get("description")
+                or (entry.get("content", [{}])[0].get("value", "") if entry.get("content") else "")
+            )
 
-        for entry in feed.entries[:5]:
             article = {
-                "title": entry.get("title", "nahi mila Title"),
+                "title": clean_text(entry.get("title", "Title not found")),
                 "source": source,
-                "description": entry.get("summary", "nahi mila Description"),
-                "published_date": entry.get("published", "nahi mili date"),
+                "description": clean_text(description),
+                "published_date": (
+                    entry.get("published")
+                    or entry.get("updated")
+                    or entry.get("pubDate")
+                    or "Date not available"
+                ),
                 "link": entry.get("link", ""),
-                "category": None,
-                "summary": None
+                "summary": None,
             }
-            # print(article)
-            # print(article["title"])
-            # print("\n")
 
             articles.append(article)
+            # print(article)
+            # print("\n")
+
     return articles
 
-fetch_news()
+# fetch_news()
+
+# with open("expp", "w", encoding="utf-8") as f:
+#     json.dump(articles, f, indent = 4, ensure_ascii = False)
