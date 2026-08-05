@@ -138,6 +138,22 @@ def get_recent_articles(limit=10):
     conn.close()
     return rows
 
+def clear_selections(week_of=None):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        DELETE FROM selections
+        WHERE week_of = %s
+        """,
+        (week_of or datetime.utcnow().date().isoformat(),)
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
 def mark_article(article_id, mark_type, week_of=None):
     conn = get_connection()
     cur = conn.cursor()
