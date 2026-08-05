@@ -76,4 +76,3 @@ def send_email_endpoint(request: SendEmailRequest):
         return {
             "message": f"Email(s) scheduled for {len(request.emails)} recipient(s) at {request.send_at.isoformat()}"
         }
-    

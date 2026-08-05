@@ -1,6 +1,6 @@
 import os
 import smtplib
-import openpyxl
+from db import get_marked_articles, get_subscriber_emails
 from email.mime.text import MIMEText
 from datetime import datetime
 
@@ -9,66 +9,41 @@ APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 SUBSCRIBERS_FILE = "subscribers.txt"
 EXCEL_FILE = "tech_top_news.xlsx"
 
-def load_subscribers():
-    if not os.path.exists(SUBSCRIBERS_FILE):
-        print("No subscribers.txt found - no one to send to.")
-        return []
-    with open(SUBSCRIBERS_FILE, "r") as f:
-        return [line.strip() for line in f.readlines() if line.strip()]
-
-def read_sheet_as_dicts(ws):
-    rows = list(ws.iter_rows(values_only=True))
-    headers = rows[0]
-    return [dict(zip(headers, row)) for row in rows[1:] if any(row)]
-
 def build_news_body(articles):
     dateline = datetime.now().strftime("%A, %B %d, %Y").upper()
     lines = [f"THE DAILY BRIEF - {dateline}", ""]
     count = 0
     for a in articles:
-        if not a.get("Title"):
+        if not a.get("title"):
             continue
-        lines.append(a.get("Title", ""))
-        lines.append(f"Source: {a.get('Source', '')} | {a.get('Published date', '')}")
-        lines.append(a.get("Description", ""))
+        lines.append(a.get("title", ""))
+        lines.append(f"Source: {a.get('source', '')} | {a.get('published_date', '')}")
+        # lines.append(a.get("description", ""))
+        lines.append(a.get("summary", ""))
         lines.append("-" * 40)
         count += 1
     if count == 0:
         lines.append("No stories today - check back tomorrow.")
     return "\n".join(lines)
 
-
 def build_tech_of_week_body(pick):
     return (
         f"TECH OF THE WEEK\n\n"
-        f"{pick.get('Title', '')}\n\n"
-        f"{pick.get('Description', '')}\n\n"
-        f"Why it matters: {pick.get('Why it matters', '')}\n\n"
-        f"Link: {pick.get('Link', '')}"
+        f"{pick.get('title', '')}\n\n"
+        f"{pick.get('description', '')}\n\n"
+        f"Link: {pick.get('link', '')}"
     )
-
-
-def build_paper_of_week_body(pick):
-    return (
-        f"PAPER OF THE WEEK\n\n"
-        f"{pick.get('Title', '')}\n"
-        f"Authors: {pick.get('Authors', '')}\n\n"
-        f"{pick.get('Description', '')}\n\n"
-        f"Link: {pick.get('Link', '')}"
-    )
-
 
 def build_topic_of_week_body(pick):
     return (
         f"TOPIC OF THE WEEK\n\n"
-        f"{pick.get('Title', '')}\n\n"
-        f"{pick.get('Explanation', '')}\n\n"
-        f"Link: {pick.get('Link', '')}"
+        f"{pick.get('title', '')}\n\n"
+        f"{pick.get('description', '')}\n\n"
+        f"Link: {pick.get('link', '')}"
     )
 
-
 def send_to_all_subscribers(subject, body):
-    subscribers = load_subscribers()
+    subscribers = get_subscriber_emails()
 
     if not subscribers:
         print("no subscribers available")
@@ -88,26 +63,27 @@ def send_to_all_subscribers(subject, body):
             server.sendmail(SENDER_EMAIL, email, msg.as_string())
             print(f"Sent '{subject}' to {email}")
 
-
 if __name__ == "__main__":
     if not SENDER_EMAIL or not APP_PASSWORD:
         print("mail/password not set in environment")
     else:
-        wb = openpyxl.load_workbook(EXCEL_FILE)
+        news_articles = get_marked_articles("news")
+        # tech_picks = get_marked_articles("tech_of_week")
+        # topic_picks = get_marked_articles("topic_of_week")
 
-        news_articles = read_sheet_as_dicts(wb["Sheet1"])
-        tech_pick = read_sheet_as_dicts(wb["Tech of the Week"])[0]
-        paper_pick = read_sheet_as_dicts(wb["Paper of the Week"])[0]
-        topic_pick = read_sheet_as_dicts(wb["Topic of the Week"])[0]
+        # tech_pick = tech_picks[0] if tech_picks else {}
+        # topic_pick = topic_picks[0] if topic_picks else {}
 
         mails = [
-            ("Your Daily News Brief", build_news_body(news_articles)),
-            (f"Tech of the Week: {tech_pick.get('Title', '')}", build_tech_of_week_body(tech_pick)),
-            (f"Paper of the Week: {paper_pick.get('Title', '')}", build_paper_of_week_body(paper_pick)),
-            (f"Topic of the Week: {topic_pick.get('Title', '')}", build_topic_of_week_body(topic_pick)),
+            ("Your Daily News Brief", build_news_body(news_articles))
+            # ,
+            # (f"Tech of the Week: {tech_pick.get('title', '')}", build_tech_of_week_body(tech_pick)),
+            # (f"Topic of the Week: {topic_pick.get('title', '')}", build_topic_of_week_body(topic_pick)),
         ]
 
         for subject, body in mails:
+            if not body.strip():
+                continue
             send_to_all_subscribers(subject, body)
 
         print("Newsletter Project Run completed")

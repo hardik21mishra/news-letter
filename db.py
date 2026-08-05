@@ -1,25 +1,11 @@
-"""
-Database layer -- connects to a hosted MySQL instance (Aiven free tier)
-over SSL. Works identically whether you run this locally or from
-GitHub Actions / Render, since it's the same remote database either way --
-that's the whole point of hosting it instead of using a local file.
 
-Needs:
-    pip install mysql-connector-python
-
-Env vars (same 3-environment pattern as GROQ_API_KEY / SENDER_EMAIL):
-    MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
-
-Also needs ca.pem (the CA certificate downloaded from Aiven) sitting in
-the same folder as this file. It's not a secret -- safe to commit.
-"""
+# Env vars MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 
 import os
 import mysql.connector
 from datetime import datetime
 
-# Only set MYSQL_SSL_CA when connecting to hosted Aiven MySQL.
-# Leave it unset for local MySQL -- local doesn't need or have SSL configured.
+
 CA_CERT_PATH = os.environ.get("MYSQL_SSL_CA")
 
 def get_connection():
@@ -33,7 +19,6 @@ def get_connection():
     if CA_CERT_PATH:
         connect_args["ssl_ca"] = CA_CERT_PATH
     return mysql.connector.connect(**connect_args)
-
 
 def init_db():
     conn = get_connection()
@@ -68,8 +53,10 @@ def init_db():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS subscribers (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(255) UNIQUE,
-            name TEXT,
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            contact_no VARCHAR(20),
+            interests TEXT,
             subscribed_at TEXT,
             active BOOLEAN DEFAULT TRUE
         )
@@ -88,7 +75,6 @@ def init_db():
     cur.close()
     conn.close()
     print(f"MySQL tables ready on {os.environ['MYSQL_HOST']}")
-
 
 def save_articles(articles):
     """
@@ -127,7 +113,6 @@ def save_articles(articles):
     cur.close()
     conn.close()
     print(f"Saved (or skipped duplicates of) {saved} articles to hosted MySQL")
-
 
 def get_recent_articles(limit=10):
     conn = get_connection()
@@ -169,7 +154,6 @@ def mark_article(article_id, mark_type, week_of=None):
     cur.close()
     conn.close()
 
-
 def get_marked_articles(mark_type, week_of=None):
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
@@ -190,7 +174,6 @@ def get_marked_articles(mark_type, week_of=None):
     conn.close()
     return rows
 
-
 def add_subscriber(email, name=""):
     conn = get_connection()
     cur = conn.cursor()
@@ -202,7 +185,6 @@ def add_subscriber(email, name=""):
     cur.close()
     conn.close()
 
-
 def add_subscriber_interest(subscriber_id, tag):
     conn = get_connection()
     cur = conn.cursor()
@@ -210,7 +192,6 @@ def add_subscriber_interest(subscriber_id, tag):
     conn.commit()
     cur.close()
     conn.close()
-
 
 def get_subscriber_emails(active_only=True):
     conn = get_connection()
