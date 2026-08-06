@@ -1,78 +1,110 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel, EmailStr
-from app import the_news
-from datetime import datetime
-from typing import List
+from datetime import datetime, timezone
+from typing import List, Optional
+from send_email import build_newsletter_mails, send_to_all_subscribers
 from apscheduler.schedulers.background import BackgroundScheduler
-from send_email import build_body
 from mailer import send_single_email
+from db import add_subscriber, unsubscribe_subscriber, get_marked_articles
 
 app = FastAPI()
 
-SUBSCRIBERS_FILE = "subscribers.txt"
- 
 
 scheduler = BackgroundScheduler()         #this
 scheduler.start()                        #this
 
 class SubscribeRequest(BaseModel):
     email: EmailStr
+    name: Optional[str] = None
+    contact_no: Optional[str] = None
+    interests: list[str] = []
+
+class UnsubscribeRequest(BaseModel):
+    email: EmailStr
 
 class SendEmailRequest(BaseModel): #this
     emails: List[EmailStr] #this
-    send_st: datetime | None = None  # this #--> sends at current time(immediately) if the time is not mentioneeed by the user
+    send_at: datetime | None = None  
 
+class BroadcastRequest(BaseModel):
+    send_at: datetime | None = None
 
 @app.get("/")
 def home():
     return {"message": "Helloooo, this is my news API"}
   
 @app.get("/news")
-def get_news(category: str = None):
-    articles = the_news() 
-    if category:
-        articles = [a for a in articles if a["category"] == category] 
-    return articles
+def get_news():
+    return get_marked_articles("news")
 
 @app.post("/subscribe")
 def subscribe(request: SubscribeRequest):
-    email = request.email
-    existing = []
-    with open(SUBSCRIBERS_FILE, "r") as f:
-        existing = [line.strip() for line in f.readlines() if line.strip()]
-    
-    if email in existing:
-        raise HTTPException(status_code=400, detail="Email is already subscribed")
- 
-    with open(SUBSCRIBERS_FILE, "a") as f:
-        f.write(email + "\n")
-    return {f"{email} subscribed successfully"}
 
-def send(emails):
-    articles = the_news()
-    body = build_body(articles)
+    add_subscriber(
+        request.name,
+        request.email,
+        request.contact_no,
+        request.interests
+    )
 
+    return {
+        "message" : "Subscribed successfully"
+    }
+
+@app.post("/unsubscribe")
+def unsubscribe(request: UnsubscribeRequest):
+    unsubscribe_subscriber(request.email)
+    return {
+        "message": f"{request.email} unsubscribed"
+    }
+
+def broadcast_now():
+    results = []
+    for subject, body in build_newsletter_mails():
+        send_to_all_subscribers(subject, body)
+        results.append({"subject": subject, "sent": True})
+    return results
+
+@app.post("/broadcast")
+def broadcast_endpoint(request: BroadcastRequest):
+    now = datetime.now(timezone.utc)
+    send_at = request.send_at
+    if send_at is not None and send_at.tzinfo is None:
+        send_at = send_at.replace(tzinfo=timezone.utc)
+    if send_at is None or send_at <= now:
+        results = broadcast_now()
+        return {
+            "message": "Newsletter broadcast send immediately", "results": results
+        }
+    else:
+        scheduler.add_job(broadcast_now, "date", run_date=send_at)
+        return {"message": f"Newsletter broadcast scheduled for {send_at.isoformat()}"}
+
+def send_on_demand(emails):
     results = []
     for email in emails:
-        success = send_single_email(email, "The Daily Brief", body)
-        results.append({"email": email, "sent": success})
-
+        for subject, body in build_newsletter_mails():
+            success = send_single_email(email, subject, body)
+            results.append({"email": email, "subject": subject, "sent": success})
     return results
 
 @app.post("/send-email")
 def send_email_endpoint(request: SendEmailRequest):
-    now = datetime.now()
-    
-    if request.send_st is None or request.send_st <= now:
-        results = send(request.emails)
+    now = datetime.now(timezone.utc)
+    send_at = request.send_at
+    if send_at is not None and send_at.tzinfo is None:
+        send_at = send_at.replace(tzinfo=timezone.utc)
+
+    if send_at is None or send_at <= now:
+        results = send_on_demand(request.emails)
         return {"message": "Email(s) send immediately", "results": results}
     else:
         scheduler.add_job(
-            send,
+            send_on_demand,
             "date",
-            run_date = request.send_at,
+            run_date = send_at,
             args = [request.emails],
         )
         return {
-            "message": f"Email(s) scheduled for {len(request.emails)} recipient(s) at {request.send_at.isoformat()}"
+            "message": f"Email(s) scheduled for {len(request.emails)} recipient(s) at {send_at.isoformat()}"
         }

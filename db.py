@@ -3,8 +3,8 @@
 
 import os
 import mysql.connector
-from datetime import datetime
-
+from datetime import datetime, timezone
+import json
 
 CA_CERT_PATH = os.environ.get("MYSQL_SSL_CA")
 
@@ -53,21 +53,12 @@ def init_db():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS subscribers (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
+            name VARCHAR(255),
             email VARCHAR(255) UNIQUE NOT NULL,
             contact_no VARCHAR(20),
             interests TEXT,
             subscribed_at TEXT,
             active BOOLEAN DEFAULT TRUE
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS subscriber_interests (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            subscriber_id INT,
-            tag VARCHAR(100),
-            FOREIGN KEY (subscriber_id) REFERENCES subscribers(id)
         )
     """)
 
@@ -104,7 +95,7 @@ def save_articles(articles):
                 a.get("category"),
                 a.get("description"),
                 a.get("summary"),
-                datetime.utcnow().isoformat(),
+                datetime.now(timezone.utc).isoformat(),
             ))
             saved += 1
         except Exception as e:
@@ -132,9 +123,8 @@ def clear_selections(week_of=None):
         DELETE FROM selections
         WHERE week_of = %s
         """,
-        (week_of or datetime.utcnow().date().isoformat(),)
+        (week_of or datetime.now(timezone.utc).date().isoformat(),)
     )
-
     conn.commit()
     cur.close()
     conn.close()
@@ -147,8 +137,8 @@ def mark_article(article_id, mark_type, week_of=None):
         VALUES (%s, %s, %s, %s)
     """, (
         article_id, mark_type,
-        week_of or datetime.utcnow().date().isoformat(),
-        datetime.utcnow().isoformat(),
+        week_of or datetime.now(timezone.utc).date().isoformat(),
+        datetime.now(timezone.utc).isoformat(),
     ))
     conn.commit()
     cur.close()
@@ -174,13 +164,19 @@ def get_marked_articles(mark_type, week_of=None):
     conn.close()
     return rows
 
-def add_subscriber(email, name=""):
+def add_subscriber(name, email, contact_no, interests):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        INSERT IGNORE INTO subscribers (email, name, subscribed_at, active)
-        VALUES (%s, %s, %s, TRUE)
-    """, (email, name, datetime.utcnow().isoformat()))
+        INSERT IGNORE INTO subscribers (name, email, contact_no, interests, subscribed_at, active)
+        VALUES (%s, %s, %s, %s, %s, TRUE)
+    """, (
+        name,
+        email,
+        contact_no,
+        json.dumps(interests or []),
+        datetime.now().isoformat(),
+    ))
     conn.commit()
     cur.close()
     conn.close()
@@ -204,6 +200,14 @@ def get_subscriber_emails(active_only=True):
     cur.close()
     conn.close()
     return [r["email"] for r in rows]
+
+def unsubscribe_subscriber(email):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE subscribers SET active = False WHERE email = %s", (email,))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 if __name__ == "__main__":
     # Run this file directly once, locally, to create the tables on the
