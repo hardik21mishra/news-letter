@@ -1,23 +1,7 @@
 """
-Replaces manual Excel file passing with a live Google Sheet, using your
-service account credentials. Same Mark-column workflow as before -- the
-curator just edits in a browser now instead of you emailing files back
+Replaces manual Excel file passing with a live Google Sheet.
+The curator just edits in a browser now instead of manually emailing files back
 and forth.
-
-Needs:
-    pip install gspread google-auth
-
-Setup (one-time):
-    1. Share your Google Sheet with the service account's email address
-       (found inside the credentials JSON, field "client_email") --
-       give it Editor access, or this won't be able to write to it.
-    2. Set env vars (same pattern as everything else):
-         GOOGLE_SHEET_ID              -- from the sheet's URL
-         GOOGLE_SERVICE_ACCOUNT_JSON  -- the ENTIRE contents of the
-                                         credentials JSON file, pasted as
-                                         one string. NEVER commit the
-                                         actual .json file to your repo --
-                                         it's a real login, unlike ca.pem.
 """
 
 import os
@@ -56,7 +40,7 @@ def export_articles_to_sheet():
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
     cur.execute("""
-        SELECT id, title, description, published_at, url, summary
+        SELECT id, title, description, published_at, url, summary, category
         FROM articles
         ORDER BY fetched_at DESC
         LIMIT %s
@@ -68,18 +52,25 @@ def export_articles_to_sheet():
     sheet = get_sheet()
     sheet.clear()
 
-    headers = ["ID", "Title", "Description", "Published_date", "Link", "Summary", "Mark"]
+    headers = ["ID", "Title", "Category", "Description", "Published_date", "Link", "Summary", "Mark"]
     data = [headers]
     for r in rows:
         data.append([
-            r["id"], r["title"], r["description"] or "", r["published_at"] or "",
-            r["url"] or "", r["summary"] or "", "",
+            r["id"], 
+            r["title"], 
+            r["category"] or "",
+            r["description"] or "", 
+            r["published_at"] or "",
+            r["url"] or "", 
+            r["summary"] or "", 
+            "",
         ])
 
     sheet.update(data)
 
     sheet.format(f"C2:C{len(data)}", {"wrapStrategy": "WRAP"})  # Description
     sheet.format(f"F2:F{len(data)}", {"wrapStrategy": "WRAP"})  # Summary
+    sheet.format(f"G2:G{len(data)}", {"wrapStrategy": "WRAP"})  # Category
 
     print(f"Exported {len(rows)} articles to the Google Sheet")
     print("Curator can now edit it live at the sheet's URL -- no file passing needed.")

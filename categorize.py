@@ -1,8 +1,7 @@
 import os
-import json
 import traceback
 from groq import Groq
-from fetch_news import fetch_news
+# from fetch_news import fetch_news
 
 api_key = os.getenv("GROQ_API_KEY")
 
@@ -10,38 +9,81 @@ if not api_key:
     raise ValueError("GROQ_API_KEY environment variable not found!")
 
 client = Groq(api_key=api_key)
+# articles = fetch_news()
 
-articles = fetch_news()
+# print(f"\nFetched {len(articles)} articles.\n")
 
-print(f"\nFetched {len(articles)} articles.\n")
+USELESS_CATEGORIES = { "news", "technology", "tech", "engineering", "software", "development", "programming", "computing", "computer science", "it", "general", "general news", "top stories", "latest", "updates", "announcement", "announcements", "blog", "blogs", "articles", "featured", "editorial", "opinion", "research", "innovation", "industry", "business", "products", "release", "releases", "events", "community", "open source",}
 
 def process_news(articles):
-
     for index, article in enumerate(articles, start=1):
-
         print(f"Processing article {index}/{len(articles)}")
         article["summary"] = None
 
-        prompt = f"""
-You are a news assistant.
+        # to avoid cases like "category": ""
+        category = article.get("category")
 
-Read the following news article.
+        if category:
+            category = category.strip().lower()
+        if not category or category in USELESS_CATEGORIES:
+            article["category"] = None
+        else:
+            article["category"] = category
+        # --------
 
-Your task is:
+        if article["category"]:
+            prompt = f"""
+    You are a news assistant.
+    Read the following news article.
+    Your task is:
+    1. Write a concise technical summary in 50 - 60 words, the summary should not contain any unnatural characters but only text.
+    Return your answer EXACTLY in this format. 
+    Summary: <summary>
 
-1. Write a concise technical summary in 40 - 60 words strictly, the summary should not contain any unnatural characters but only text.
+    News Title:
+    {article["title"]}
 
-Return your answer EXACTLY in this format.
+    News Description:
+    {article["description"]}
+"""   
+        else:
 
-Summary: <summary>
+            prompt = f"""
+        You are a news assistant.
 
-News Title:
-{article["title"]}
+        Read the following article.
 
-News Description:
-{article["description"]}
+        1. Write a concise technical summary in 50-60 words.
+
+        2. Classify it into EXACTLY ONE category from:
+
+        AI
+        Programming
+        Backend
+        Frontend
+        Cloud
+        DevOps
+        Cybersecurity
+        Data Science
+        Database
+        Networking
+        Mobile
+        Hardware
+        Open Source
+        Research
+        Other(mention it according to you)
+
+        Return EXACTLY:
+
+        Summary: <summary>
+        Category: <category>
+        Also make sure to strip all the leading and trailing "*" from your category amswer
+        News Title:
+        {article["title"]}
+
+        News Description:
+        {article["description"]}
 """
-
         try:
             response = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
@@ -53,22 +95,21 @@ News Description:
                 ],
                 temperature=0.2
             )
-
             result = response.choices[0].message.content
 
             # print(result)
 
             lines = result.split("\n")
-
             for line in lines:
                 clean_line = line.strip().lstrip("*").strip()
 
                 if clean_line.startswith("Summary:"):
                     article["summary"] = clean_line.replace("Summary:", "").strip()
-                    break
+                elif clean_line.startswith("Category:"):
+                    article["category"] = clean_line.replace("Category", "").strip()
 
             if article["summary"] is None:
-                print(f"Couldn't parse summary for article {index}")
+                print(f"Couldn't generate summary for article {index}")
                 print("Model Output:")
                 print(result)
                 print("-" * 60)
@@ -82,7 +123,6 @@ News Description:
             continue
 
     return articles
-
 
 # from to_excel import export_to_excel
 

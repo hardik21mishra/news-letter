@@ -105,6 +105,13 @@ def fetch_news():
                 )
             )
 
+            rss_category = None
+
+            if hasattr(entry, "tags") and entry.tags:
+                rss_category = entry.tags[0].term
+            elif entry.get("category"):
+                rss_category = entry.get("category")
+
             article = {
                 "title": clean_text(entry.get("title", "Title not found")),
                 "source": source,
@@ -117,6 +124,7 @@ def fetch_news():
                 ),
                 "link": entry.get("link", ""),
                 "summary": None,
+                "category": rss_category
             }
 
             articles.append(article)
