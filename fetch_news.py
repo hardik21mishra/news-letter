@@ -68,7 +68,6 @@ feed_links = {
     "https://rss.slashdot.org/Slashdot/slashdotMain": "Slashdot",
 }
 
-
 def clean_text(text):
     if not text:
         return "Description not found"
@@ -104,7 +103,6 @@ def fetch_news():
                     else ""
                 )
             )
-
             rss_category = None
 
             if hasattr(entry, "tags") and entry.tags:
@@ -126,11 +124,9 @@ def fetch_news():
                 "summary": None,
                 "category": rss_category
             }
-
             articles.append(article)
             # print(article)
             # print("\n")
-
     return articles
 
 # main
@@ -154,6 +150,3 @@ def fetch_sum_save():
 if __name__ == "__main__":
     fetch_sum_save()
 # fetch_news()
-
-# with open("expp", "w", encoding="utf-8") as f:
-#     json.dump(articles, f, indent = 4, ensure_ascii = False)

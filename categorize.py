@@ -3,6 +3,9 @@ import traceback
 from groq import Groq
 # from fetch_news import fetch_news
 
+from dotenv import load_dotenv
+load_dotenv()
+
 api_key = os.getenv("GROQ_API_KEY")
 
 if not api_key:
@@ -121,7 +124,6 @@ def process_news(articles):
             traceback.print_exc()
             print("-" * 80)
             continue
-
     return articles
 
 # from to_excel import export_to_excel

@@ -1,16 +1,15 @@
-"""
-Replaces manual Excel file passing with a live Google Sheet.
-The curator just edits in a browser now instead of manually emailing files back
-and forth.
-"""
+# Replace manual excel file editing with live google sheet
+# Now no need to manually upload and download the google sheet
 
 import os
 import json
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import date
-from db import get_connection, mark_article
+from db import get_connection
 # from fetch_news import fetch_sum_save
+
+from dotenv import load_dotenv
+load_dotenv()
 
 SHEET_ID = os.environ.get("GOOGLE_SHEET_ID") 
 
@@ -21,7 +20,6 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
 
 ARTICLE_LIMIT = 200
 
-
 def get_sheet():
     if os.path.exists("credentials.json"):
         creds = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
@@ -30,7 +28,6 @@ def get_sheet():
         creds = Credentials.from_service_account_info(creds_json, scopes=SCOPES)
     client = gspread.authorize(creds)
     return client.open_by_key(SHEET_ID).sheet1  # first tab
-
 
 def export_articles_to_sheet():
     """Overwrites the sheet with the latest fetched articles + empty Mark column."""
@@ -51,7 +48,6 @@ def export_articles_to_sheet():
 
     sheet = get_sheet()
     sheet.clear()
-
     headers = ["ID", "Title", "Category", "Description", "Published_date", "Link", "Summary", "Mark"]
     data = [headers]
     for r in rows:
@@ -65,7 +61,6 @@ def export_articles_to_sheet():
             r["summary"] or "", 
             "",
         ])
-
     sheet.update(data)
 
     sheet.format(f"C2:C{len(data)}", {"wrapStrategy": "WRAP"})  # Description
@@ -74,7 +69,6 @@ def export_articles_to_sheet():
 
     print(f"Exported {len(rows)} articles to the Google Sheet")
     print("Curator can now edit it live at the sheet's URL -- no file passing needed.")
-
 
 if __name__ == "__main__":
     export_articles_to_sheet()

@@ -1,10 +1,11 @@
 import smtplib
 import os
 from email.mime.text import MIMEText
+from dotenv import load_dotenv
+load_dotenv()
 
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
-
 
 def send_single_email(to_email, subject, body):
     if not SENDER_EMAIL or not APP_PASSWORD:

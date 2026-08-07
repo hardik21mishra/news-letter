@@ -1,10 +1,12 @@
-
 # Env vars MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 
 import os
 import mysql.connector
 from datetime import datetime, timezone
 import json
+
+from dotenv import load_dotenv
+load_dotenv()
 
 CA_CERT_PATH = os.environ.get("MYSQL_SSL_CA")
 
@@ -23,7 +25,6 @@ def get_connection():
 def init_db():
     conn = get_connection()
     cur = conn.cursor()
-
     cur.execute("""
         CREATE TABLE IF NOT EXISTS articles (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -105,15 +106,6 @@ def save_articles(articles):
     conn.close()
     print(f"Saved (or skipped duplicates of) {saved} articles to hosted MySQL")
 
-def get_recent_articles(limit=10):
-    conn = get_connection()
-    cur = conn.cursor(dictionary=True)
-    cur.execute("SELECT * FROM articles ORDER BY fetched_at DESC LIMIT %s", (limit,))
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
-    return rows
-
 def clear_selections(week_of=None):
     conn = get_connection()
     cur = conn.cursor()
@@ -181,14 +173,6 @@ def add_subscriber(name, email, contact_no, interests):
     cur.close()
     conn.close()
 
-def add_subscriber_interest(subscriber_id, tag):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("INSERT INTO subscriber_interests (subscriber_id, tag) VALUES (%s, %s)", (subscriber_id, tag))
-    conn.commit()
-    cur.close()
-    conn.close()
-
 def get_subscriber_emails(active_only=True):
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
@@ -210,6 +194,4 @@ def unsubscribe_subscriber(email):
     conn.close()
 
 if __name__ == "__main__":
-    # Run this file directly once, locally, to create the tables on the
-    # hosted database for the first time: python db.py
     init_db()

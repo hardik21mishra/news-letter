@@ -8,10 +8,8 @@ from mailer import send_single_email
 from db import add_subscriber, unsubscribe_subscriber, get_marked_articles
 
 app = FastAPI()
-
-
-scheduler = BackgroundScheduler()         #this
-scheduler.start()                        #this
+scheduler = BackgroundScheduler()        
+scheduler.start()                       
 
 class SubscribeRequest(BaseModel):
     email: EmailStr
@@ -22,8 +20,8 @@ class SubscribeRequest(BaseModel):
 class UnsubscribeRequest(BaseModel):
     email: EmailStr
 
-class SendEmailRequest(BaseModel): #this
-    emails: List[EmailStr] #this
+class SendEmailRequest(BaseModel): 
+    emails: List[EmailStr] 
     send_at: datetime | None = None  
 
 class BroadcastRequest(BaseModel):
@@ -39,14 +37,12 @@ def get_news():
 
 @app.post("/subscribe")
 def subscribe(request: SubscribeRequest):
-
     add_subscriber(
         request.name,
         request.email,
         request.contact_no,
         request.interests
     )
-
     return {
         "message" : "Subscribed successfully"
     }

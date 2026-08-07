@@ -4,6 +4,9 @@ from db import get_marked_articles, get_subscriber_emails
 from email.mime.text import MIMEText
 from datetime import datetime
 
+from dotenv import load_dotenv
+load_dotenv()
+
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 
@@ -75,7 +78,6 @@ def build_newsletter_mails():
         (f"Topic of the Week: {topic_pick.get('title', '')}", build_topic_of_week_body(topic_pick)),
     ]
     return [(subject, body) for subject, body in mails if body.strip()]
-
 
 if __name__ == "__main__":
     if not SENDER_EMAIL or not APP_PASSWORD:
