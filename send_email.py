@@ -14,17 +14,24 @@ def build_news_body(articles):
     dateline = datetime.now().strftime("%A, %B %d, %Y").upper()
     lines = [f"THE DAILY BRIEF - {dateline}", ""]
     count = 0
+
     for a in articles:
         if not a.get("title"):
             continue
+
+        lines.append(f"[{a.get('category', 'Uncategorized')}]")
         lines.append(a.get("title", ""))
-        lines.append(f"Source: {a.get('source', '')} | {a.get('published_date', '')}")
-        # lines.append(a.get("description", ""))
+        lines.append(
+            f"Source: {a.get('source', '')} | {a.get('published_at', '')}"
+        )
         lines.append(a.get("summary", ""))
         lines.append("-" * 40)
+
         count += 1
+
     if count == 0:
         lines.append("No stories today - check back tomorrow.")
+
     return "\n".join(lines)
 
 def build_tech_of_week_body(pick):
