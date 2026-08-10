@@ -11,3 +11,4 @@ requests
 uvicorn
 python-dotenv
 email-validator
+premailer

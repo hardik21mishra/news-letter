@@ -4,6 +4,7 @@ import os
 import mysql.connector
 from datetime import datetime, timezone
 import json
+import secrets
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -58,6 +59,7 @@ def init_db():
             email VARCHAR(255) UNIQUE NOT NULL,
             contact_no VARCHAR(20),
             interests TEXT,
+            unsubscribe_token VARCHAR(64) UNIQUE,
             subscribed_at TEXT,
             active BOOLEAN DEFAULT TRUE
         )
@@ -159,14 +161,18 @@ def get_marked_articles(mark_type, week_of=None):
 def add_subscriber(name, email, contact_no, interests):
     conn = get_connection()
     cur = conn.cursor()
+
+    unsubscribe_token = secrets.token_urlsafe(32)
+   
     cur.execute("""
-        INSERT IGNORE INTO subscribers (name, email, contact_no, interests, subscribed_at, active)
-        VALUES (%s, %s, %s, %s, %s, TRUE)
+        INSERT IGNORE INTO subscribers (name, email, contact_no, interests, unsubscribe_token, subscribed_at, active)
+        VALUES (%s, %s, %s, %s, %s, %s, TRUE)
     """, (
         name,
         email,
         contact_no,
         json.dumps(interests or []),
+        unsubscribe_token,
         datetime.now().isoformat(),
     ))
     conn.commit()
@@ -184,6 +190,41 @@ def get_subscriber_emails(active_only=True):
     cur.close()
     conn.close()
     return [r["email"] for r in rows]
+
+def get_unsubscribe_token(email):
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute(
+        "SELECT unsubscribe_token FROM subscribers WHERE email = %s",
+        (email,)
+    )
+
+    row = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return row["unsubscribe_token"] if row else None
+
+def unsubscribe_by_token(token):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        UPDATE subscribers
+        SET active = FALSE
+        WHERE unsubscribe_token = %s
+        """,
+        (token,)
+    )
+    conn.commit()
+    success = cur.rowcount > 0
+    cur.close()
+    conn.close()
+
+    return success
 
 def unsubscribe_subscriber(email):
     conn = get_connection()

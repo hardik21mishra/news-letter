@@ -123,7 +123,7 @@ def fetch_news():
                 "link": entry.get("link", ""),
                 "summary": None,
                 "category": rss_category
-            }
+            }  
             articles.append(article)
             # print(article)
             # print("\n")
