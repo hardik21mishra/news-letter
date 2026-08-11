@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.utils import parsedate_to_datetime
 from datetime import datetime
 
-from db import (get_marked_articles, get_subscriber_emails, get_unsubscribe_token)
+from db import get_marked_articles, get_subscriber_emails
 from premailer import transform
 
 from dotenv import load_dotenv
@@ -15,17 +15,11 @@ load_dotenv()
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 
-# ---------------------------------------------------------
-# Public URL of your FastAPI application.
-# ---------------------------------------------------------
 BASE_URL = os.getenv(
     "BASE_URL",
     "http://127.0.0.1:8000"
 )
 
-# =========================================================
-# HTML HEAD (CSS & Opening Structure)
-# =========================================================
 HTML_HEAD = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -127,9 +121,6 @@ HTML_HEAD = """<!DOCTYPE html>
             <table class="container" width="100%" cellpadding="0" cellspacing="0" border="0">
 """
 
-# =========================================================
-# HTML FOOTER (Closing Structure)
-# =========================================================
 HTML_FOOTER = """
             </table>
 
@@ -157,9 +148,6 @@ HTML_FOOTER = """
 </html>
 """
 
-# =========================================================
-# ARTICLE DATE FORMATTER
-# =========================================================
 def format_article_date(raw_date):
     if not raw_date:
         return "DATE UNKNOWN"
@@ -180,14 +168,10 @@ def format_article_date(raw_date):
 
     return "DATE UNKNOWN"
 
-# =========================================================
-# BUILD NEWS BODY
-# =========================================================
-def build_news_body(articles, recipient_email):
+def build_news_body(articles, recipient_email, subscriber_id):
     send_date = datetime.now().strftime("%d %b %Y").upper()
-    unsubscribe_token = get_unsubscribe_token(recipient_email)
 
-    unsubscribe_url = f"{BASE_URL}/unsubscribe/{unsubscribe_token}"
+    unsubscribe_url = f"{BASE_URL}/unsubscribe/{subscriber_id}"
 
     # 1. Start HTML (leaves container table open)
     html_content = HTML_HEAD
@@ -304,18 +288,13 @@ def build_news_body(articles, recipient_email):
 
     return html_content
 
-# =========================================================
-# TECH / TOPIC OF THE WEEK (Plaintext overrides)
-# =========================================================
 def build_tech_of_week_body(pick):
     return f"TECH OF THE WEEK\n\n{pick.get('title', '')}\n\n{pick.get('description', '')}\n\nLink: {pick.get('link', '')}"
 
 def build_topic_of_week_body(pick):
     return f"TOPIC OF THE WEEK\n\n{pick.get('title', '')}\n\n{pick.get('description', '')}\n\nLink: {pick.get('link', '')}"
 
-# =========================================================
-# SEND EMAIL
-# =========================================================
+
 def send_to_all_subscribers(subject, body, html_email=True):
     subscribers = get_subscriber_emails()
 
@@ -327,9 +306,11 @@ def send_to_all_subscribers(subject, body, html_email=True):
         server.starttls()
         server.login(SENDER_EMAIL, APP_PASSWORD)
 
-        for email in subscribers:
+        for subscriber in subscribers:
+            subscriber_id = subscriber["id"]
+            email = subscriber["email"]
             if html_email:
-                personalized_body = body(email)
+                personalized_body = body(email, subscriber_id);
                 inlined_html = transform(personalized_body)
                 msg = MIMEText(inlined_html, "html")
             else:
@@ -342,9 +323,6 @@ def send_to_all_subscribers(subject, body, html_email=True):
             server.sendmail(SENDER_EMAIL, email, msg.as_string())
             print(f"Sent '{subject}' to {email}")
 
-# =========================================================
-# BUILD NEWSLETTER EMAILS
-# =========================================================
 def build_newsletter_mails():
     news_articles = get_marked_articles("news")
     tech_picks = get_marked_articles("tech_of_week")
@@ -356,7 +334,11 @@ def build_newsletter_mails():
     mails = [
         (
             "Your Daily News Brief",
-            lambda email: build_news_body(news_articles, email),
+            lambda email, subscriber_id: build_news_body(
+            news_articles,
+            email,
+            subscriber_id
+        ),
             True
         )
         # Uncomment below if you want plain text separate emails:
@@ -366,9 +348,6 @@ def build_newsletter_mails():
 
     return [(subject, body, html_email) for subject, body, html_email in mails if body]
 
-# =========================================================
-# MAIN
-# =========================================================
 if __name__ == "__main__":
     if not SENDER_EMAIL or not APP_PASSWORD:
         print("mail/password not set in environment")

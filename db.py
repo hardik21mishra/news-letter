@@ -31,7 +31,7 @@ def init_db():
             id INT AUTO_INCREMENT PRIMARY KEY,
             title TEXT,
             author TEXT,
-            url VARCHAR(768) UNIQUE,
+            url VARCHAR(800) UNIQUE,
             published_at TEXT,
             source TEXT,
             category TEXT,
@@ -59,7 +59,6 @@ def init_db():
             email VARCHAR(255) UNIQUE NOT NULL,
             contact_no VARCHAR(20),
             interests TEXT,
-            unsubscribe_token VARCHAR(64) UNIQUE,
             subscribed_at TEXT,
             active BOOLEAN DEFAULT TRUE
         )
@@ -161,8 +160,6 @@ def get_marked_articles(mark_type, week_of=None):
 def add_subscriber(name, email, contact_no, interests):
     conn = get_connection()
     cur = conn.cursor()
-
-    unsubscribe_token = secrets.token_urlsafe(32)
    
     cur.execute("""
         INSERT IGNORE INTO subscribers (name, email, contact_no, interests, unsubscribe_token, subscribed_at, active)
@@ -172,7 +169,6 @@ def add_subscriber(name, email, contact_no, interests):
         email,
         contact_no,
         json.dumps(interests or []),
-        unsubscribe_token,
         datetime.now().isoformat(),
     ))
     conn.commit()
@@ -182,54 +178,34 @@ def add_subscriber(name, email, contact_no, interests):
 def get_subscriber_emails(active_only=True):
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
+
     if active_only:
-        cur.execute("SELECT email FROM subscribers WHERE active = TRUE")
+        cur.execute("""
+            SELECT id, email
+            FROM subscribers
+            WHERE active = TRUE
+        """)
     else:
-        cur.execute("SELECT email FROM subscribers")
+        cur.execute("""
+            SELECT id, email
+            FROM subscribers
+        """)
     rows = cur.fetchall()
-    cur.close()
-    conn.close()
-    return [r["email"] for r in rows]
-
-def get_unsubscribe_token(email):
-    conn = get_connection()
-    cur = conn.cursor(dictionary=True)
-
-    cur.execute(
-        "SELECT unsubscribe_token FROM subscribers WHERE email = %s",
-        (email,)
-    )
-
-    row = cur.fetchone()
 
     cur.close()
     conn.close()
 
-    return row["unsubscribe_token"] if row else None
+    return rows
 
-def unsubscribe_by_token(token):
+def unsubscribe_subscriber(user_id):
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute(
-        """
-        UPDATE subscribers
-        SET active = FALSE
-        WHERE unsubscribe_token = %s
-        """,
-        (token,)
-    )
-    conn.commit()
-    success = cur.rowcount > 0
-    cur.close()
-    conn.close()
+    cur.execute("""
+        UPDATE subscribers SET active = False
+        WHERE id = %s
+    """, (user_id,))
 
-    return success
-
-def unsubscribe_subscriber(email):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("UPDATE subscribers SET active = False WHERE email = %s", (email,))
     conn.commit()
     cur.close()
     conn.close()

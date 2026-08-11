@@ -5,7 +5,7 @@ from typing import List, Optional
 from send_email import build_newsletter_mails, send_to_all_subscribers
 from apscheduler.schedulers.background import BackgroundScheduler
 from mailer import send_single_email
-from db import add_subscriber, unsubscribe_by_token , get_marked_articles
+from db import add_subscriber, unsubscribe_subscriber , get_marked_articles
 
 app = FastAPI()
 scheduler = BackgroundScheduler()        
@@ -16,8 +16,6 @@ class SubscribeRequest(BaseModel):
     name: Optional[str] = None
     contact_no: Optional[str] = None
     interests: list[str] = []
-
-
 
 class SendEmailRequest(BaseModel): 
     emails: List[EmailStr] 
@@ -46,17 +44,12 @@ def subscribe(request: SubscribeRequest):
         "message" : "Subscribed successfully"
     }
 
-@app.get("/unsubscribe/{token}")
-def unsubscribe(token: str):
-    success = unsubscribe_by_token(token)
-
-    if success:
-        return {
-            "message": "You have been successfully unsubscribed."
-        }
+@app.get("/unsubscribe/{user_id}")
+def unsubscribe(user_id: int):
+    unsubscribe_subscriber(user_id)
 
     return {
-        "message": "Invalid or expired unsubscribe link."
+        "message": "You have been successfully unsubscribed."
     }
 
 def broadcast_now():
