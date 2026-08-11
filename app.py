@@ -20,6 +20,6 @@ if __name__ == "__main__":
         print("Title        :", article["title"])
         print("Category     :", article["category"])
         print("Summary      :", article["summary"])
-        print("Published On :", article["published_date"])
+        print("Published On :", article["published_at"])
         print("Read More    :", article["link"])
         print("\n")

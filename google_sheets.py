@@ -48,7 +48,7 @@ def export_articles_to_sheet():
 
     sheet = get_sheet()
     sheet.clear()
-    headers = ["ID", "Title", "Category", "Description", "Published_date", "Link", "Summary", "Mark"]
+    headers = ["ID", "Title", "Category", "Description", "Published_at", "Link", "Summary", "Mark"]
     data = [headers]
     for r in rows:
         data.append([

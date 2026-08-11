@@ -4,12 +4,15 @@ import os
 import mysql.connector
 from datetime import datetime, timezone
 import json
-import secrets
+from zoneinfo import ZoneInfo
+
+IST = ZoneInfo("Asia/Kolkata")
 
 from dotenv import load_dotenv
 load_dotenv()
 
 CA_CERT_PATH = os.environ.get("MYSQL_SSL_CA")
+
 
 def get_connection():
     connect_args = dict(
@@ -25,14 +28,14 @@ def get_connection():
 
 def init_db():
     conn = get_connection()
-    cur = conn.cursor()
+    cur = conn.cursor(dictionary=True)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS articles (
             id INT AUTO_INCREMENT PRIMARY KEY,
             title TEXT,
             author TEXT,
-            url VARCHAR(800) UNIQUE,
-            published_at TEXT,
+            url VARCHAR(768) UNIQUE,
+            published_at DATETIME,
             source TEXT,
             category TEXT,
             description TEXT,
@@ -46,7 +49,6 @@ def init_db():
             id INT AUTO_INCREMENT PRIMARY KEY,
             article_id INT,
             mark_type VARCHAR(50),
-            week_of TEXT,
             created_at TEXT,
             FOREIGN KEY (article_id) REFERENCES articles(id)
         )
@@ -69,6 +71,7 @@ def init_db():
     conn.close()
     print(f"MySQL tables ready on {os.environ['MYSQL_HOST']}")
 
+
 def save_articles(articles):
     """
     Accepts a list of article dicts in the normalized shape used across
@@ -80,6 +83,10 @@ def save_articles(articles):
     saved = 0
     for a in articles:
         try:
+            published_at_value = a.get("published_at")
+            if published_at_value is None:
+                published_at_value = a.get("published")
+
             cur.execute("""
                 INSERT INTO articles
                 (title, author, url, published_at, source, category, description, summary, fetched_at)
@@ -92,12 +99,12 @@ def save_articles(articles):
                 a.get("title"),
                 a.get("author"),
                 a.get("url") or a.get("link"),
-                a.get("published_at") or a.get("published") or a.get("published_date"),
+                published_at_value,
                 a.get("source"),
                 a.get("category"),
                 a.get("description"),
                 a.get("summary"),
-                datetime.now(timezone.utc).isoformat(),
+                datetime.now(IST).replace(tzinfo=None),
             ))
             saved += 1
         except Exception as e:
@@ -107,73 +114,61 @@ def save_articles(articles):
     conn.close()
     print(f"Saved (or skipped duplicates of) {saved} articles to hosted MySQL")
 
-def clear_selections(week_of=None):
-    conn = get_connection()
-    cur = conn.cursor()
 
-    cur.execute(
-        """
-        DELETE FROM selections
-        WHERE week_of = %s
-        """,
-        (week_of or datetime.now(timezone.utc).date().isoformat(),)
-    )
-    conn.commit()
-    cur.close()
-    conn.close()
+def clear_selections():
+    return None
 
-def mark_article(article_id, mark_type, week_of=None):
+
+def mark_article(article_id, mark_type):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO selections (article_id, mark_type, week_of, created_at)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO selections (article_id, mark_type, created_at)
+        VALUES (%s, %s, %s)
     """, (
-        article_id, mark_type,
-        week_of or datetime.now(timezone.utc).date().isoformat(),
+        article_id,
+        mark_type,
         datetime.now(timezone.utc).isoformat(),
     ))
     conn.commit()
     cur.close()
     conn.close()
 
-def get_marked_articles(mark_type, week_of=None):
+
+def get_marked_articles(mark_type):
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
-    if week_of is None:
-        cur.execute("SELECT MAX(week_of) AS latest FROM selections WHERE mark_type = %s", (mark_type,))
-        row = cur.fetchone()
-        week_of = row["latest"] if row else None
-    if week_of is None:
-        cur.close(); conn.close()
-        return []
     cur.execute("""
         SELECT articles.* FROM selections
         JOIN articles ON articles.id = selections.article_id
-        WHERE selections.mark_type = %s AND selections.week_of = %s
-    """, (mark_type, week_of))
+        WHERE selections.mark_type = %s
+        ORDER BY articles.published_at DESC, articles.fetched_at DESC
+    """, (mark_type,))
     rows = cur.fetchall()
     cur.close()
     conn.close()
     return rows
 
+
 def add_subscriber(name, email, contact_no, interests):
     conn = get_connection()
     cur = conn.cursor()
-   
+
     cur.execute("""
-        INSERT IGNORE INTO subscribers (name, email, contact_no, interests, unsubscribe_token, subscribed_at, active)
-        VALUES (%s, %s, %s, %s, %s, %s, TRUE)
+        INSERT IGNORE INTO subscribers (name, email, contact_no, interests, subscribed_at, active)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, (
         name,
         email,
         contact_no,
         json.dumps(interests or []),
         datetime.now().isoformat(),
+        True,
     ))
     conn.commit()
     cur.close()
     conn.close()
+
 
 def get_subscriber_emails(active_only=True):
     conn = get_connection()
@@ -197,6 +192,7 @@ def get_subscriber_emails(active_only=True):
 
     return rows
 
+
 def unsubscribe_subscriber(user_id):
     conn = get_connection()
     cur = conn.cursor()
@@ -209,6 +205,7 @@ def unsubscribe_subscriber(user_id):
     conn.commit()
     cur.close()
     conn.close()
+
 
 if __name__ == "__main__":
     init_db()

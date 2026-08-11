@@ -1,20 +1,15 @@
-from datetime import date
 from db import mark_article
 from google_sheets import get_sheet
-from db import clear_selections
 
 VALID_MARKS = {"Keep", "keep", "tech_of_week", "paper_of_week", "topic_of_week"}
+
 
 def import_marks_from_sheet():
     """Reads the curator's current marks straight from the live sheet."""
     sheet = get_sheet()
     records = sheet.get_all_records()  # list of dicts, keyed by header row
 
-    week_of = date.today().isoformat()
     counts = {"news": 0, "tech_of_week": 0, "paper_of_week": 0, "topic_of_week": 0}
-
-# Remove this week's previous selections
-    clear_selections(week_of)
 
     for row in records:
         article_id = row.get("ID")
@@ -28,10 +23,10 @@ def import_marks_from_sheet():
             continue
 
         mark_type = "news" if mark == "keep" or mark == "Keep" else mark
-        mark_article(article_id, mark_type, week_of)
+        mark_article(article_id, mark_type)
         counts[mark_type] += 1
 
-    print(f"\nImported marks for week_of={week_of}:")
+    print("\nImported marks:")
     for mark_type, count in counts.items():
         print(f"  {mark_type}: {count}")
 
@@ -40,5 +35,6 @@ def import_marks_from_sheet():
             print(f"WARNING: no article marked '{weekly_type}'")
         elif counts[weekly_type] > 1:
             print(f"WARNING: {counts[weekly_type]} articles marked '{weekly_type}', expected 1")
+
 
 import_marks_from_sheet()
