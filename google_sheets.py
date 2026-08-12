@@ -1,5 +1,6 @@
 # Replace manual excel file editing with live google sheet
 # Now no need to manually upload and download the google sheet
+# to send and receive from the curator
 
 import os
 import json
@@ -37,7 +38,7 @@ def export_articles_to_sheet():
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
     cur.execute("""
-        SELECT id, title, description, published_at, url, summary, category
+        SELECT id, title, source, description, published_at, url, summary, category
         FROM articles
         ORDER BY fetched_at DESC
         LIMIT %s
@@ -48,24 +49,37 @@ def export_articles_to_sheet():
 
     sheet = get_sheet()
     sheet.clear()
-    headers = ["ID", "Title", "Category", "Description", "Published_at", "Link", "Summary", "Mark"]
+    headers = ["ID", "Title", "source", "Category", "Description", "Published_at", "Link", "Summary", "Mark"]
     data = [headers]
     for r in rows:
         data.append([
             r["id"], 
             r["title"], 
+            r["source"],
             r["category"] or "",
             r["description"] or "", 
-            r["published_at"] or "",
+            r["published_at"].strftime("%Y-%m-%d %H:%M:%S") if r["published_at"] else "",
             r["url"] or "", 
             r["summary"] or "", 
             "",
         ])
     sheet.update(data)
+    
+    # Wrap long text so it stays inside its own cell
+    sheet.format(f"D2:D{len(data)}", {
+        "wrapStrategy": "WRAP",
+        "verticalAlignment": "TOP"
+    })
 
-    sheet.format(f"C2:C{len(data)}", {"wrapStrategy": "WRAP"})  # Description
-    sheet.format(f"F2:F{len(data)}", {"wrapStrategy": "WRAP"})  # Summary
-    sheet.format(f"G2:G{len(data)}", {"wrapStrategy": "WRAP"})  # Category
+    sheet.format(f"G2:G{len(data)}", {
+        "wrapStrategy": "WRAP",
+        "verticalAlignment": "TOP"
+    })
+
+    sheet.format(f"C2:C{len(data)}", {
+        "wrapStrategy": "WRAP",
+        "verticalAlignment": "TOP"
+    })
 
     print(f"Exported {len(rows)} articles to the Google Sheet")
     print("Curator can now edit it live at the sheet's URL -- no file passing needed.")

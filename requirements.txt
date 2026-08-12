@@ -12,3 +12,4 @@ uvicorn
 python-dotenv
 email-validator
 premailer
+pandas

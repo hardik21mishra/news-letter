@@ -6,8 +6,6 @@ from datetime import timezone
 from zoneinfo import ZoneInfo
 from email.utils import parsedate_to_datetime
 
-import json
-
 feed_links = {
     "https://www.infoq.com/feed/": "InfoQ",
     "https://martinfowler.com/feed.atom": "Martin Fowler",
@@ -18,70 +16,70 @@ feed_links = {
     "https://code.fb.com/feed/": "Meta Engineering",
     "https://github.blog/feed/": "GitHub Blog",
 
-    # "https://engineering.linkedin.com/blog.rss.html": "LinkedIn Engineering",
-    # "https://dropbox.tech/feed": "Dropbox Tech",
-    # "https://stripe.com/blog/feed.rss": "Stripe Engineering",
-    # "https://engineering.atspotify.com/feed/": "Spotify Engineering",
-    # "https://www.datadoghq.com/blog/rss/": "Datadog Engineering",
-    # "https://engineering.salesforce.com/feed/": "Salesforce Engineering",
-    # "https://www.twilio.com/en-us/blog/rss.xml": "Twilio Engineering",
+    "https://engineering.linkedin.com/blog.rss.html": "LinkedIn Engineering",
+    "https://dropbox.tech/feed": "Dropbox Tech",
+    "https://stripe.com/blog/feed.rss": "Stripe Engineering",
+    "https://engineering.atspotify.com/feed/": "Spotify Engineering",
+    "https://www.datadoghq.com/blog/rss/": "Datadog Engineering",
+    "https://engineering.salesforce.com/feed/": "Salesforce Engineering",
+    "https://www.twilio.com/en-us/blog/rss.xml": "Twilio Engineering",
 
 
-    # "https://aws.amazon.com/blogs/aws/feed/": "AWS",
-    # "https://cloud.google.com/blog/products/rss/": "Google Cloud",
-    # "https://www.cncf.io/feed/": "CNCF",
-    # "https://kubernetes.io/feed.xml": "Kubernetes",
-    # "https://istio.io/latest/feed.xml": "Istio",
-    # "https://www.hashicorp.com/blog/feed.xml": "HashiCorp",
-    # "https://grafana.com/blog/rss/": "Grafana Labs",
-    # "https://prometheus.io/feed.xml": "Prometheus",
-    # "https://www.elastic.co/blog/feed": "Elastic",
-    # "https://helm.sh/feed.xml": "Helm",
-    # "https://thenewstack.io/feed/": "The New Stack",
+    "https://aws.amazon.com/blogs/aws/feed/": "AWS",
+    "https://cloud.google.com/blog/products/rss/": "Google Cloud",
+    "https://www.cncf.io/feed/": "CNCF",
+    "https://kubernetes.io/feed.xml": "Kubernetes",
+    "https://istio.io/latest/feed.xml": "Istio",
+    "https://www.hashicorp.com/blog/feed.xml": "HashiCorp",
+    "https://grafana.com/blog/rss/": "Grafana Labs",
+    "https://prometheus.io/feed.xml": "Prometheus",
+    "https://www.elastic.co/blog/feed": "Elastic",
+    "https://helm.sh/feed.xml": "Helm",
+    "https://thenewstack.io/feed/": "The New Stack",
 
-    # "https://openai.com/news/rss.xml": "OpenAI",
-    # "https://huggingface.co/blog/feed.xml": "Hugging Face",
-    # "https://research.google/blog/rss/": "Google Research",
-    # "https://blogs.microsoft.com/ai/feed/": "Microsoft AI",
-    # "https://www.anthropic.com/news/rss.xml": "Anthropic",
-    # "https://pytorch.org/feed.xml": "PyTorch",
-    # "https://www.tensorflow.org/feed.xml": "TensorFlow",
-    # "https://engineering.fb.com/category/ai/feed/": "Meta AI Engineering",
-    # "https://developer.nvidia.com/blog/feed": "NVIDIA",
+    "https://openai.com/news/rss.xml": "OpenAI",
+    "https://huggingface.co/blog/feed.xml": "Hugging Face",
+    "https://research.google/blog/rss/": "Google Research",
+    "https://blogs.microsoft.com/ai/feed/": "Microsoft AI",
+    "https://www.anthropic.com/news/rss.xml": "Anthropic",
+    "https://pytorch.org/feed.xml": "PyTorch",
+    "https://www.tensorflow.org/feed.xml": "TensorFlow",
+    "https://engineering.fb.com/category/ai/feed/": "Meta AI Engineering",
+    "https://developer.nvidia.com/blog/feed": "NVIDIA",
 
-    # "https://www.cockroachlabs.com/blog/rss.xml": "CockroachDB",
-    # "https://www.timescale.com/blog/rss/": "TimescaleDB",
-    # "https://planet.postgresql.org/rss20.xml": "Planet PostgreSQL",
-    # "https://redis.com/feed/": "Redis",
-    # "https://www.mongodb.com/blog/rss": "MongoDB",
+    "https://www.cockroachlabs.com/blog/rss.xml": "CockroachDB",
+    "https://www.timescale.com/blog/rss/": "TimescaleDB",
+    "https://planet.postgresql.org/rss20.xml": "Planet PostgreSQL",
+    "https://redis.com/feed/": "Redis",
+    "https://www.mongodb.com/blog/rss": "MongoDB",
 
-    # "https://googleprojectzero.blogspot.com/feeds/posts/default": "Google Project Zero",
-    # "https://feeds.feedburner.com/TheHackersNews": "The Hacker News",
-    # "https://unit42.paloaltonetworks.com/feed/": "Palo Alto Unit 42",
-    # "https://blog.talosintelligence.com/feeds/posts/default": "Cisco Talos",
-    # "https://www.schneier.com/feed/atom/": "Schneier on Security",
+    "https://googleprojectzero.blogspot.com/feeds/posts/default": "Google Project Zero",
+    "https://feeds.feedburner.com/TheHackersNews": "The Hacker News",
+    "https://unit42.paloaltonetworks.com/feed/": "Palo Alto Unit 42",
+    "https://blog.talosintelligence.com/feeds/posts/default": "Cisco Talos",
+    "https://www.schneier.com/feed/atom/": "Schneier on Security",
 
-    # "https://go.dev/blog/feed.atom": "Go Blog",
-    # "https://blog.rust-lang.org/feed.xml": "Rust Blog",
-    # "https://v8.dev/blog.atom": "V8 JavaScript Engine",
-    # "https://developer.chrome.com/feed.xml": "Chrome Developers",
-    # "https://webkit.org/feed/": "WebKit",
-    # "https://blog.jetbrains.com/feed/": "JetBrains Blog",
-    # "https://planet.kernel.org/rss20.xml": "Planet Kernel",
-    # "https://planet.python.org/rss20.xml": "Planet Python",
+    "https://go.dev/blog/feed.atom": "Go Blog",
+    "https://blog.rust-lang.org/feed.xml": "Rust Blog",
+    "https://v8.dev/blog.atom": "V8 JavaScript Engine",
+    "https://developer.chrome.com/feed.xml": "Chrome Developers",
+    "https://webkit.org/feed/": "WebKit",
+    "https://blog.jetbrains.com/feed/": "JetBrains Blog",
+    "https://planet.kernel.org/rss20.xml": "Planet Kernel",
+    "https://planet.python.org/rss20.xml": "Planet Python",
 
-    # "https://medium.com/feed/tag/artificial-intelligence": "Medium - AI",
-    # "https://medium.com/feed/tag/machine-learning": "Medium - Machine Learning",
-    # "https://medium.com/feed/tag/software-engineering": "Medium - Software Engineering",
-    # "https://medium.com/feed/tag/programming": "Medium - Programming",
-    # "https://medium.com/feed/tag/cloud-computing": "Medium - Cloud Computing",
-    # "https://medium.com/feed/tag/devops": "Medium - DevOps",
-    # "https://medium.com/feed/tag/kubernetes": "Medium - Kubernetes",
-    # "https://medium.com/feed/tag/data-engineering": "Medium - Data Engineering",
-    # "https://medium.com/feed/tag/cybersecurity": "Medium - Cybersecurity",
+    "https://medium.com/feed/tag/artificial-intelligence": "Medium",
+    "https://medium.com/feed/tag/machine-learning": "Medium",
+    "https://medium.com/feed/tag/software-engineering": "Medium",
+    "https://medium.com/feed/tag/programming": "Medium",
+    "https://medium.com/feed/tag/cloud-computing": "Medium",
+    "https://medium.com/feed/tag/devops": "Medium",
+    "https://medium.com/feed/tag/kubernetes": "Medium",
+    "https://medium.com/feed/tag/data-engineering": "Medium",
+    "https://medium.com/feed/tag/cybersecurity": "Medium",
 
-    # "https://feeds.arstechnica.com/arstechnica/index": "Ars Technica",
-    # "https://rss.slashdot.org/Slashdot/slashdotMain": "Slashdot",
+    "https://feeds.arstechnica.com/arstechnica/index": "Ars Technica",
+    "https://rss.slashdot.org/Slashdot/slashdotMain": "Slashdot",
 }
 
 IST = ZoneInfo("Asia/Kolkata")
@@ -123,7 +121,6 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text)                  #remove whitespace
 
     return text.strip()
-
 
 def fetch_news():
     articles = []

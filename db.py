@@ -1,5 +1,4 @@
 # Env vars MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
-
 import os
 import mysql.connector
 from datetime import datetime, timezone
@@ -12,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 CA_CERT_PATH = os.environ.get("MYSQL_SSL_CA")
-
 
 def get_connection():
     connect_args = dict(
@@ -71,12 +69,9 @@ def init_db():
     conn.close()
     print(f"MySQL tables ready on {os.environ['MYSQL_HOST']}")
 
-
 def save_articles(articles):
     """
-    Accepts a list of article dicts in the normalized shape used across
-    the project (title, author, url, published_at, source, category,
-    description, summary). Duplicate URLs are silently skipped.
+    Accepts a list of article dicts in the normalized shape
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -114,10 +109,8 @@ def save_articles(articles):
     conn.close()
     print(f"Saved (or skipped duplicates of) {saved} articles to hosted MySQL")
 
-
 def clear_selections():
     return None
-
 
 def mark_article(article_id, mark_type):
     conn = get_connection()
@@ -134,7 +127,6 @@ def mark_article(article_id, mark_type):
     cur.close()
     conn.close()
 
-
 def get_marked_articles(mark_type):
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
@@ -148,7 +140,6 @@ def get_marked_articles(mark_type):
     cur.close()
     conn.close()
     return rows
-
 
 def add_subscriber(name, email, contact_no, interests):
     conn = get_connection()
@@ -169,7 +160,6 @@ def add_subscriber(name, email, contact_no, interests):
     cur.close()
     conn.close()
 
-
 def get_subscriber_emails(active_only=True):
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
@@ -186,12 +176,9 @@ def get_subscriber_emails(active_only=True):
             FROM subscribers
         """)
     rows = cur.fetchall()
-
     cur.close()
     conn.close()
-
     return rows
-
 
 def unsubscribe_subscriber(user_id):
     conn = get_connection()
@@ -205,7 +192,6 @@ def unsubscribe_subscriber(user_id):
     conn.commit()
     cur.close()
     conn.close()
-
 
 if __name__ == "__main__":
     init_db()
