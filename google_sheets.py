@@ -4,6 +4,8 @@
 
 import os
 import json
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import gspread
 from google.oauth2.service_account import Credentials
 from db import get_connection
@@ -20,6 +22,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
           "https://www.googleapis.com/auth/drive"]
 
 ARTICLE_LIMIT = 200
+IST = ZoneInfo("Asia/Kolkata")
 
 def get_sheet():
     if os.path.exists("credentials.json"):
@@ -31,18 +34,22 @@ def get_sheet():
     return client.open_by_key(SHEET_ID).sheet1  # first tab
 
 def export_articles_to_sheet():
-    """Overwrites the sheet with the latest fetched articles + empty Mark column."""
+    """Overwrites the sheet with today's fetched articles + empty Mark column."""
 
     # fetch_sum_save() # --> runs the fetch file before 
 
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
+    today = datetime.now(IST).date()
+    cutoff_date = today - timedelta(days=2)
+
     cur.execute("""
         SELECT id, title, source, description, published_at, url, summary, category
         FROM articles
-        ORDER BY fetched_at DESC
+        WHERE DATE(fetched_at) = %s AND DATE(published_at) >= %s
+        ORDER BY published_at DESC
         LIMIT %s
-    """, (ARTICLE_LIMIT,))
+    """, (today, cutoff_date, ARTICLE_LIMIT))
     rows = cur.fetchall()
     cur.close()
     conn.close()

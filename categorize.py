@@ -16,7 +16,7 @@ client = Groq(api_key=api_key)
 
 # print(f"\nFetched {len(articles)} articles.\n")
 
-USELESS_CATEGORIES = { "news", "technology", "tech", "engineering", "software", "development", "programming", "computing", "computer science", "it", "general", "general news", "top stories", "latest", "updates", "announcement", "announcements", "blog", "blogs", "articles", "featured", "editorial", "opinion", "research", "innovation", "industry", "business", "products", "release", "releases", "events", "community", "open source",}
+LOW_VALUE_CATEGORIES = { "news", "technology", "tech", "engineering", "software", "development", "programming", "computing", "computer science", "it", "general", "general news", "top stories", "latest", "updates", "announcement", "announcements", "blog", "blogs", "articles", "featured", "editorial", "opinion", "research", "innovation", "industry", "business", "products", "release", "releases", "events", "community", "open source",}
 
 def process_news(articles):
     for index, article in enumerate(articles, start=1):
@@ -28,7 +28,7 @@ def process_news(articles):
 
         if category:
             category = category.strip().lower()
-        if not category or category in USELESS_CATEGORIES:
+        if not category or category in LOW_VALUE_CATEGORIES:
             article["category"] = None
         else:
             article["category"] = category
@@ -89,7 +89,7 @@ def process_news(articles):
 """
         try:
             response = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="openai/gpt-oss-20b",
                 messages=[
                     {
                         "role": "user",
