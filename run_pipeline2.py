@@ -1,7 +1,6 @@
 from import_marks_store import import_marks_from_sheet
 from send_email import build_newsletter_mails, send_to_all_subscribers
 
-
 def run_pipeline2():
     print("-" * 60)
     print("PIPELINE 2 STARTED")
