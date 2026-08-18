@@ -44,14 +44,15 @@ def init_db():
 
     cur.execute("""
         CREATE TABLE IF NOT EXISTS selections (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            article_id INT,
-            mark_type VARCHAR(50),
-            created_at TEXT,
-            FOREIGN KEY (article_id) REFERENCES articles(id)
-        )
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        article_id INT NOT NULL,
+        mark_type VARCHAR(50) NOT NULL,
+        created_at TEXT,
+        UNIQUE KEY unique_article_mark (article_id, mark_type),
+        FOREIGN KEY (article_id) REFERENCES articles(id)
+    );
     """)
-
+    
     cur.execute("""
         CREATE TABLE IF NOT EXISTS subscribers (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -116,7 +117,7 @@ def mark_article(article_id, mark_type):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO selections (article_id, mark_type, created_at)
+        INSERT IGNORE INTO selections (article_id, mark_type, created_at)
         VALUES (%s, %s, %s)
     """, (
         article_id,

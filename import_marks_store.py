@@ -3,11 +3,11 @@ from google_sheets import get_sheet
 
 VALID_MARKS = {"Keep", "keep", "tech_of_week", "paper_of_week", "topic_of_week"}
 
-
 def import_marks_from_sheet():
     """Reads the curator's current marks straight from the live sheet."""
     sheet = get_sheet()
-    records = sheet.get_all_records()  # list of dicts, keyed by header row
+    # only fields this importer needs are ID and Mark.
+    records = sheet.get_all_records(expected_headers=["ID", "Mark"])
 
     counts = {"news": 0, "tech_of_week": 0, "paper_of_week": 0, "topic_of_week": 0}
 
@@ -36,5 +36,5 @@ def import_marks_from_sheet():
         elif counts[weekly_type] > 1:
             print(f"WARNING: {counts[weekly_type]} articles marked '{weekly_type}', expected 1")
 
-
-import_marks_from_sheet()
+if __name__ == "__main__":
+    import_marks_from_sheet()
