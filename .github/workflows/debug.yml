@@ -1,0 +1,15 @@
+name: Debug
+on: push
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug creds (temporary)
+        env:
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+        run: |
+          echo "user len: ${#MYSQL_USER}"
+          echo "pass len: ${#MYSQL_PASSWORD}"
+          echo "host: $MYSQL_HOST"
