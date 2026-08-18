@@ -44,6 +44,16 @@ jobs:
           export MYSQL_PORT="${MYSQL_PORT:-3306}"
           echo "MYSQL_PORT=${MYSQL_PORT}" >> "$GITHUB_ENV"
 
+      - name: Write MySQL CA certificate
+        shell: bash
+        env:
+          MYSQL_SSL_CA: ${{ secrets.MYSQL_SSL_CA }}
+        run: |
+          if [ -n "$MYSQL_SSL_CA" ]; then
+            printf '%s' "$MYSQL_SSL_CA" > /tmp/aiven-ca.pem
+            echo "MYSQL_SSL_CA=/tmp/aiven-ca.pem" >> "$GITHUB_ENV"
+          fi
+
       - name: Write Google service account credentials file
         shell: bash
         env:

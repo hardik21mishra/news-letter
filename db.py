@@ -19,16 +19,42 @@ def get_required_env(name):
 
 
 def get_connection():
+    host = get_required_env("MYSQL_HOST")
     ca_cert_path = os.getenv("MYSQL_SSL_CA")
+
     connect_args = dict(
-        host=get_required_env("MYSQL_HOST"),
+        host=host,
         port=int(os.getenv("MYSQL_PORT", 3306)),
         user=get_required_env("MYSQL_USER"),
         password=get_required_env("MYSQL_PASSWORD"),
         database=get_required_env("MYSQL_DATABASE"),
+        charset="utf8mb4",
+        autocommit=False,
     )
-    if ca_cert_path:
-        connect_args["ssl_ca"] = ca_cert_path
+
+    # Aiven MySQL requires TLS and a CA certificate for secure connections.
+    if host.endswith(".aivencloud.com"):
+        if not ca_cert_path:
+            raise RuntimeError(
+                "Aiven MySQL requires MYSQL_SSL_CA to be set to the CA certificate file path. "
+                "Add it to your .env or GitHub Actions secrets."
+            )
+        connect_args.update(
+            {
+                "ssl_disabled": False,
+                "ssl_verify_cert": True,
+                "ssl_ca": ca_cert_path,
+            }
+        )
+    elif ca_cert_path:
+        connect_args.update(
+            {
+                "ssl_disabled": False,
+                "ssl_verify_cert": True,
+                "ssl_ca": ca_cert_path,
+            }
+        )
+
     return mysql.connector.connect(**connect_args)
 
 def init_db():
