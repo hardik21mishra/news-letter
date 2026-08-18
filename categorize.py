@@ -6,12 +6,13 @@ from groq import Groq
 from dotenv import load_dotenv
 load_dotenv()
 
-api_key = os.getenv("GROQ_API_KEY")
 
-if not api_key:
-    raise ValueError("GROQ_API_KEY environment variable not found!")
+def get_groq_client():
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise RuntimeError("GROQ_API_KEY environment variable not found. Add it to your environment or GitHub Actions secrets.")
+    return Groq(api_key=api_key)
 
-client = Groq(api_key=api_key)
 # articles = fetch_news()
 
 # print(f"\nFetched {len(articles)} articles.\n")
@@ -19,6 +20,8 @@ client = Groq(api_key=api_key)
 LOW_VALUE_CATEGORIES = { "news", "technology", "tech", "engineering", "software", "development", "programming", "computing", "computer science", "it", "general", "general news", "top stories", "latest", "updates", "announcement", "announcements", "blog", "blogs", "articles", "featured", "editorial", "opinion", "research", "innovation", "industry", "business", "products", "release", "releases", "events", "community", "open source",}
 
 def process_news(articles):
+    client = get_groq_client()
+
     for index, article in enumerate(articles, start=1):
         print(f"Processing article {index}/{len(articles)}")
         article["summary"] = None

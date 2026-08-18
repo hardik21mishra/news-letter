@@ -10,18 +10,25 @@ IST = ZoneInfo("Asia/Kolkata")
 from dotenv import load_dotenv
 load_dotenv()
 
-CA_CERT_PATH = os.environ.get("MYSQL_SSL_CA")
+
+def get_required_env(name):
+    value = os.getenv(name)
+    if value is None or value == "":
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
 
 def get_connection():
+    ca_cert_path = os.getenv("MYSQL_SSL_CA")
     connect_args = dict(
-        host=os.environ["MYSQL_HOST"],
-        port=int(os.environ.get("MYSQL_PORT", 3306)),
-        user=os.environ["MYSQL_USER"],
-        password=os.environ["MYSQL_PASSWORD"],
-        database=os.environ["MYSQL_DATABASE"],
+        host=get_required_env("MYSQL_HOST"),
+        port=int(os.getenv("MYSQL_PORT", 3306)),
+        user=get_required_env("MYSQL_USER"),
+        password=get_required_env("MYSQL_PASSWORD"),
+        database=get_required_env("MYSQL_DATABASE"),
     )
-    if CA_CERT_PATH:
-        connect_args["ssl_ca"] = CA_CERT_PATH
+    if ca_cert_path:
+        connect_args["ssl_ca"] = ca_cert_path
     return mysql.connector.connect(**connect_args)
 
 def init_db():
@@ -68,7 +75,7 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
-    print(f"MySQL tables ready on {os.environ['MYSQL_HOST']}")
+    print(f"MySQL tables ready on {os.getenv('MYSQL_HOST', 'unknown host')}")
 
 def save_articles(articles):
     """

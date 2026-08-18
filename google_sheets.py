@@ -14,24 +14,33 @@ from db import get_connection
 from dotenv import load_dotenv
 load_dotenv()
 
-SHEET_ID = os.environ.get("GOOGLE_SHEET_ID") 
-
-# print("Using SHEET_ID:", repr(SHEET_ID))
-
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
           "https://www.googleapis.com/auth/drive"]
 
 ARTICLE_LIMIT = 200
 IST = ZoneInfo("Asia/Kolkata")
 
+
+def get_sheet_id():
+    sheet_id = os.getenv("GOOGLE_SHEET_ID")
+    if not sheet_id:
+        raise RuntimeError("GOOGLE_SHEET_ID environment variable not found. Add it to your environment or GitHub Actions secrets.")
+    return sheet_id
+
+
 def get_sheet():
+    sheet_id = get_sheet_id()
+
     if os.path.exists("credentials.json"):
         creds = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
     else:
-        creds_json = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+        creds_json_raw = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+        if not creds_json_raw:
+            raise RuntimeError("Neither credentials.json nor GOOGLE_SERVICE_ACCOUNT_JSON was found. Add the Google service account secret for GitHub Actions.")
+        creds_json = json.loads(creds_json_raw)
         creds = Credentials.from_service_account_info(creds_json, scopes=SCOPES)
     client = gspread.authorize(creds)
-    return client.open_by_key(SHEET_ID).sheet1  # first tab
+    return client.open_by_key(sheet_id).sheet1  # first tab
 
 def export_articles_to_sheet():
     """Overwrites the sheet with today's fetched articles + empty Mark column."""
