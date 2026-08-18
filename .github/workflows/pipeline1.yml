@@ -50,9 +50,16 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: |
           if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
-            python -c "import os; content = os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON', '');
-            assert content, 'GOOGLE_SERVICE_ACCOUNT_JSON is empty';
-            open('credentials.json', 'w', encoding='utf-8').write(content)"
+            python - <<'PY'
+            import os
+
+            content = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "")
+            if not content:
+                raise SystemExit("GOOGLE_SERVICE_ACCOUNT_JSON is empty")
+
+            with open("credentials.json", "w", encoding="utf-8") as f:
+                f.write(content)
+            PY
           fi
 
       - name: Run pipeline 1
