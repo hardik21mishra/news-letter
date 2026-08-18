@@ -1,3 +1,11 @@
+- name: Check database configuration
+  run: |
+    echo "HOST: ${MYSQL_HOST}"
+    echo "PORT: ${MYSQL_PORT}"
+    echo "USER: ${MYSQL_USER}"
+    echo "DATABASE: ${MYSQL_DATABASE}"
+    echo "PASSWORD_SET: $([[ -n "$MYSQL_PASSWORD" ]] && echo true || echo false)"
+    
 name: Newsletter - Pipeline 1
 
 on:
