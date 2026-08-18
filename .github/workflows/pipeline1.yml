@@ -1,11 +1,3 @@
-- name: Check database configuration
-  run: |
-    echo "HOST: ${MYSQL_HOST}"
-    echo "PORT: ${MYSQL_PORT}"
-    echo "USER: ${MYSQL_USER}"
-    echo "DATABASE: ${MYSQL_DATABASE}"
-    echo "PASSWORD_SET: $([[ -n "$MYSQL_PASSWORD" ]] && echo true || echo false)"
-    
 name: Newsletter - Pipeline 1
 
 on:
@@ -43,6 +35,29 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Debug MySQL connectivity
+        env:
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        run: |
+          python - <<'PY'
+          import os, mysql.connector
+          print("Trying MySQL connection...")
+          conn = mysql.connector.connect(
+              host=os.environ["MYSQL_HOST"],
+              port=int(os.environ.get("MYSQL_PORT", "3306")),
+              user=os.environ["MYSQL_USER"],
+              password=os.environ["MYSQL_PASSWORD"],
+              database=os.environ["MYSQL_DATABASE"],
+              connect_timeout=15,
+          )
+          print("CONNECTED")
+          conn.close()
+          PY
 
       - name: Run Pipeline 1
         run: python run_pipeline1.py
