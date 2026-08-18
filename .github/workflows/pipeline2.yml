@@ -1,15 +1,15 @@
-name: Pipeline 1 - Fetch and export articles
+name: Pipeline 2 - Import selections and send newsletter
 
 on:
   schedule:
-    - cron: "30 23 * * *"
+    - cron: "30 11 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  pipeline1:
+  pipeline2:
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -23,6 +23,9 @@ jobs:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
       GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+      EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+      BASE_URL: ${{ secrets.BASE_URL }}
 
     steps:
       - name: Checkout repository
@@ -63,5 +66,5 @@ jobs:
             python -c 'import os, pathlib; content = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", ""); assert content, "GOOGLE_SERVICE_ACCOUNT_JSON is empty"; pathlib.Path("credentials.json").write_text(content, encoding="utf-8")'
           fi
 
-      - name: Run pipeline 1
-        run: python run_pipeline1.py
+      - name: Run pipeline 2
+        run: python run_pipeline2.py

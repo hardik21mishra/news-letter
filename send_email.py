@@ -15,10 +15,13 @@ load_dotenv()
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 
-BASE_URL = os.getenv(
-    "BASE_URL",
-    "http://127.0.0.1:8000"
-)
+# Temporarily disabled to allow the scheduled newsletter job to run before the app is publicly deployed.
+# Once the backend is live, set BASE_URL to the public app URL, e.g. https://newsletter.example.com
+# BASE_URL = os.getenv(
+#     "BASE_URL",
+#     "http://127.0.0.1:8000"
+# )
+BASE_URL = os.getenv("BASE_URL", "")
 
 HTML_HEAD = """<!DOCTYPE html>
 <html lang="en">
@@ -171,7 +174,7 @@ def format_article_date(raw_date):
 def build_news_body(articles, recipient_email, subscriber_id):
     send_date = datetime.now().strftime("%d %b %Y").upper()
 
-    unsubscribe_url = f"{BASE_URL}/unsubscribe/{subscriber_id}"
+    unsubscribe_url = f"{BASE_URL}/unsubscribe/{subscriber_id}" if BASE_URL else "#"
 
     # 1. Start HTML (leaves container table open)
     html_content = HTML_HEAD
