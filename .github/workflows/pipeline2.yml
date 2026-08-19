@@ -20,6 +20,7 @@ jobs:
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
       MYSQL_SSL_CA: ${{ secrets.MYSQL_SSL_CA }}
+      MYSQL_SSL_VERIFY_CERT: 'true'
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
       GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}

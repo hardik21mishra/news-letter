@@ -29,8 +29,10 @@ def process_news(articles):
         # to avoid cases like "category": ""
         category = article.get("category")
 
-        if category:
+        if isinstance(category, str):
             category = category.strip().lower()
+        else:
+            category = None
         if not category or category in LOW_VALUE_CATEGORIES:
             article["category"] = None
         else:

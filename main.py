@@ -2,10 +2,11 @@ from fastapi import FastAPI
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timezone
 from typing import List, Optional
-from send_email import build_newsletter_mails, send_to_all_subscribers
+from send_email import build_newsletter_mails, send_to_all_subscribers, render_email_body
 from apscheduler.schedulers.background import BackgroundScheduler
 from mailer import send_single_email
 from db import add_subscriber, unsubscribe_subscriber , get_marked_articles
+import uvicorn
 
 app = FastAPI()
 scheduler = BackgroundScheduler()        
@@ -54,8 +55,8 @@ def unsubscribe(user_id: int):
 
 def broadcast_now():
     results = []
-    for subject, body in build_newsletter_mails():
-        send_to_all_subscribers(subject, body)
+    for subject, body, html_email in build_newsletter_mails():
+        send_to_all_subscribers(subject, body, html_email)
         results.append({"subject": subject, "sent": True})
     return results
 
@@ -77,8 +78,9 @@ def broadcast_endpoint(request: BroadcastRequest):
 def send_on_demand(emails):
     results = []
     for email in emails:
-        for subject, body in build_newsletter_mails():
-            success = send_single_email(email, subject, body)
+        for subject, body, html_email in build_newsletter_mails():
+            rendered_body = render_email_body(body, email, None, html_email)
+            success = send_single_email(email, subject, rendered_body, html_email)
             results.append({"email": email, "subject": subject, "sent": success})
     return results
 
@@ -102,3 +104,6 @@ def send_email_endpoint(request: SendEmailRequest):
         return {
             "message": f"Email(s) scheduled for {len(request.emails)} recipient(s) at {send_at.isoformat()}"
         }
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

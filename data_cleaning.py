@@ -1,74 +1,54 @@
 import pandas as pd
-from db import get_connection
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
-def clean_articles():
-    conn = get_connection()
+IST = ZoneInfo("Asia/Kolkata")
+ARTICLE_AGE_DAYS = 2
 
-    # Read all articles from the database
-    df = pd.read_sql("""
-        SELECT id, title, published_at
-        FROM articles 
-    """, conn)
+def clean_articles(articles):
+    """Remove undated, outdated, and duplicate fetched articles."""
+    original_count = len(articles)
 
-    if df.empty:
-        print("No articles found in the database.")
-        conn.close()
-        return
-    original_count = len(df)
+    articles_df = pd.DataFrame(articles).copy()
 
-#   Remove articles without a published_at date
-    df["published_at"] = pd.to_datetime(
-        df["published_at"],
-        errors="coerce"
+    if "published_at" not in articles_df:
+        articles_df["published_at"] = pd.NaT
+    if "title" not in articles_df:
+        articles_df["title"] = None
+
+    articles_df["parsed_published_at"] = pd.to_datetime(
+        articles_df["published_at"], errors="coerce"
     )
 
-    missing_date = df["published_at"].isna()
-    missing_date_ids = df.loc[missing_date, "id"].tolist()
-    df = df[~missing_date].copy()
-    print(f"Articles without published_at: {len(missing_date_ids)}")
+    dated_articles = articles_df[articles_df["parsed_published_at"].notna()].copy()
+    missing_date_count = original_count - len(dated_articles)
+    print(f"Articles without published_at: {missing_date_count}")
 
-    # Remove duplicate titles and Sort newest articles first
-    df = df.sort_values(
-        by="published_at",
-        ascending=False
+    cutoff_date = datetime.now(IST).date() - timedelta(days=ARTICLE_AGE_DAYS)
+    recent_articles = dated_articles[
+        dated_articles["parsed_published_at"].dt.date >= cutoff_date
+    ].copy()
+
+    old_article_count = len(dated_articles) - len(recent_articles)
+    print(f"Articles older than {ARTICLE_AGE_DAYS} days: {old_article_count}")
+
+    recent_articles = recent_articles.sort_values(
+        by="parsed_published_at", ascending=False
     )
-    duplicate_titles = df.duplicated(
-        subset=["title"],
-        keep="first"
-    )
-    duplicate_ids = df.loc[duplicate_titles, "id"].tolist()
-    df = df[~duplicate_titles].copy()
-    print(f"Duplicate-title articles: {len(duplicate_ids)}")
 
-    # Delete unwanted articles from Database
+    cleaned_articles_df = recent_articles.drop_duplicates(
+        subset="title", keep="first"
+    ).drop(columns="parsed_published_at")
+    
+    cleaned_articles = cleaned_articles_df.to_dict("records")
 
-    ids_to_delete = (
-        missing_date_ids
-        + duplicate_ids
-    )
-    # Remove duplicate IDs if an article matched
-    ids_to_delete = list(set(ids_to_delete))
-
-    if ids_to_delete:
-        cur = conn.cursor()
-        placeholders = ", ".join(["%s"] * len(ids_to_delete))
-        cur.execute(
-            f"""
-            DELETE FROM articles
-            WHERE id IN ({placeholders})
-            """,
-            tuple(ids_to_delete)
-        )
-        conn.commit()
-        cur.close()
-    conn.close()
-
-    final_count = original_count - len(ids_to_delete)
-
+    duplicate_count = len(recent_articles) - len(cleaned_articles)
+    print(f"Duplicate-title articles: {duplicate_count}")
     print("\nArticle cleaning completed.")
     print(f"Articles before cleaning : {original_count}")
-    print(f"Articles deleted         : {len(ids_to_delete)}")
-    print(f"Articles remaining       : {final_count}")
+    print(f"Articles removed         : {original_count - len(cleaned_articles)}")
+    print(f"Articles remaining       : {len(cleaned_articles)}")
+    return cleaned_articles
 
 if __name__ == "__main__":
-    clean_articles()
+    print("nothing, preferebly run it from the fetch_articles.py")

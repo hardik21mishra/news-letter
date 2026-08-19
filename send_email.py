@@ -21,7 +21,7 @@ APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 #     "BASE_URL",
 #     "http://127.0.0.1:8000"
 # )
-BASE_URL = os.getenv("BASE_URL", "")
+BASE_URL = os.getenv("BASE_URL") or "http://127.0.0.1:8000"
 
 HTML_HEAD = """<!DOCTYPE html>
 <html lang="en">
@@ -297,6 +297,11 @@ def build_tech_of_week_body(pick):
 def build_topic_of_week_body(pick):
     return f"TOPIC OF THE WEEK\n\n{pick.get('title', '')}\n\n{pick.get('description', '')}\n\nLink: {pick.get('link', '')}"
 
+def render_email_body(body, recipient_email, subscriber_id, html_email):
+    if html_email:
+        return transform(body(recipient_email, subscriber_id))
+    return body
+
 
 def send_to_all_subscribers(subject, body, html_email=True):
     subscribers = get_subscriber_emails()
@@ -312,12 +317,13 @@ def send_to_all_subscribers(subject, body, html_email=True):
         for subscriber in subscribers:
             subscriber_id = subscriber["id"]
             email = subscriber["email"]
+            rendered_body = render_email_body(
+                body, email, subscriber_id, html_email
+            )
             if html_email:
-                personalized_body = body(email, subscriber_id);
-                inlined_html = transform(personalized_body)
-                msg = MIMEText(inlined_html, "html")
+                msg = MIMEText(rendered_body, "html")
             else:
-                msg = MIMEText(body, "plain")
+                msg = MIMEText(rendered_body, "plain")
 
             msg["Subject"] = subject
             msg["From"] = SENDER_EMAIL
@@ -344,10 +350,20 @@ def build_newsletter_mails():
         ),
             True
         )
-        # Uncomment below if you want plain text separate emails:
-        # (f"Tech of the Week: {tech_pick.get('title', '')}", build_tech_of_week_body(tech_pick), False),
-        # (f"Topic of the Week: {topic_pick.get('title', '')}", build_topic_of_week_body(topic_pick), False)
     ]
+
+    if tech_pick:
+        mails.append((
+            f"Tech of the Week: {tech_pick.get('title', '')}",
+            build_tech_of_week_body(tech_pick),
+            False,
+        ))
+    if topic_pick:
+        mails.append((
+            f"Topic of the Week: {topic_pick.get('title', '')}",
+            build_topic_of_week_body(topic_pick),
+            False,
+        ))
 
     return [(subject, body, html_email) for subject, body, html_email in mails if body]
 

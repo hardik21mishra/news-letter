@@ -7,12 +7,12 @@ load_dotenv()
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 
-def send_single_email(to_email, subject, body):
+def send_single_email(to_email, subject, body, html_email=True):
     if not SENDER_EMAIL or not APP_PASSWORD:
         print("WARNING: SENDER_EMAIL or EMAIL_APP_PASSWORD not set.")
         return False
 
-    msg = MIMEText(body, "html")
+    msg = MIMEText(body, "html" if html_email else "plain")
     msg["Subject"] = subject
     msg["From"] = SENDER_EMAIL
     msg["To"] = to_email

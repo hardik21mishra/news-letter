@@ -1,7 +1,7 @@
 from db import mark_article
 from google_sheets import get_sheet
 
-VALID_MARKS = {"Keep", "keep", "tech_of_week", "paper_of_week", "topic_of_week"}
+VALID_MARKS = {"Keep", "keep", "tech_of_week", "topic_of_week"}
 
 def import_marks_from_sheet():
     """Reads the curator's current marks straight from the live sheet."""
@@ -9,7 +9,7 @@ def import_marks_from_sheet():
     # only fields this importer needs are ID and Mark.
     records = sheet.get_all_records(expected_headers=["ID", "Mark"])
 
-    counts = {"news": 0, "tech_of_week": 0, "paper_of_week": 0, "topic_of_week": 0}
+    counts = {"news": 0, "tech_of_week": 0, "topic_of_week": 0}
 
     for row in records:
         article_id = row.get("ID")
@@ -30,7 +30,7 @@ def import_marks_from_sheet():
     for mark_type, count in counts.items():
         print(f"  {mark_type}: {count}")
 
-    for weekly_type in ["tech_of_week", "paper_of_week", "topic_of_week"]:
+    for weekly_type in ["tech_of_week", "topic_of_week"]:
         if counts[weekly_type] == 0:
             print(f"WARNING: no article marked '{weekly_type}'")
         elif counts[weekly_type] > 1:
@@ -38,3 +38,4 @@ def import_marks_from_sheet():
 
 if __name__ == "__main__":
     import_marks_from_sheet()
+    

@@ -1,10 +1,9 @@
 # Replace manual excel file editing with live google sheet
 # Now no need to manually upload and download the google sheet
 # to send and receive from the curator
-
 import os
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
 import gspread
 from google.oauth2.service_account import Credentials
@@ -20,13 +19,11 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
 ARTICLE_LIMIT = 200
 IST = ZoneInfo("Asia/Kolkata")
 
-
 def get_sheet_id():
     sheet_id = os.getenv("GOOGLE_SHEET_ID")
     if not sheet_id:
         raise RuntimeError("GOOGLE_SHEET_ID environment variable not found. Add it to your environment or GitHub Actions secrets.")
     return sheet_id
-
 
 def get_sheet():
     sheet_id = get_sheet_id()
@@ -46,19 +43,19 @@ def export_articles_to_sheet():
     """Overwrites the sheet with today's fetched articles + empty Mark column."""
 
     # fetch_sum_save() # --> runs the fetch file before 
-
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
     today = datetime.now(IST).date()
-    cutoff_date = today - timedelta(days=2)
 
     cur.execute("""
         SELECT id, title, source, description, published_at, url, summary, category
         FROM articles
-        WHERE DATE(fetched_at) = %s AND DATE(published_at) >= %s
+                WHERE DATE(fetched_at) = %s
+                    AND summary IS NOT NULL
+                    AND TRIM(summary) <> ''
         ORDER BY published_at DESC
         LIMIT %s
-    """, (today, cutoff_date, ARTICLE_LIMIT))
+        """, (today, ARTICLE_LIMIT))
     rows = cur.fetchall()
     cur.close()
     conn.close()

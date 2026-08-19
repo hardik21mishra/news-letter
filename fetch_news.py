@@ -78,7 +78,6 @@ feed_links = {
     "https://medium.com/feed/tag/data-engineering": "Medium",
     "https://medium.com/feed/tag/cybersecurity": "Medium",
 
-    "https://feeds.arstechnica.com/arstechnica/index": "Ars Technica",
     "https://rss.slashdot.org/Slashdot/slashdotMain": "Slashdot",
 }
 
@@ -126,7 +125,7 @@ def fetch_news():
     articles = []
     for feed_url, source in feed_links.items():
         feed = feedparser.parse(feed_url)
-        for entry in feed.entries[:2]:
+        for entry in feed.entries[:3]:
             description = (
                 entry.get("summary")
                 or entry.get("description")
@@ -167,16 +166,21 @@ def fetch_news():
 def fetch_sum_save():
     from categorize import process_news
     from db import init_db, save_articles
+    from data_cleaning import clean_articles
 
     init_db() 
 
     articles = fetch_news()
     print(f"Fetched {len(articles)} articles total")
 
-
-    print("Categorized and summarized articles")
-
+    articles = clean_articles(articles)
     articles = process_news(articles)
+    missing_summary_count = sum(
+        not str(article.get("summary") or "").strip()
+        for article in articles
+    )
+    print("Categorized and summarized articles")
+    print(f"Articles without summary after categorization: {missing_summary_count}")
     save_articles(articles)
     print("saved articles to the database")
 

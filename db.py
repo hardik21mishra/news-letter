@@ -1,5 +1,6 @@
 # Env vars MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 import os
+import tempfile
 import mysql.connector
 from datetime import datetime, timezone
 import json
@@ -21,6 +22,22 @@ def get_required_env(name):
 def get_connection():
     host = get_required_env("MYSQL_HOST")
     ca_cert_path = os.getenv("MYSQL_SSL_CA")
+    temporary_ca_path = None
+    verify_ssl_setting = os.getenv("MYSQL_SSL_VERIFY_CERT")
+    verify_ssl = (
+        bool(ca_cert_path)
+        if verify_ssl_setting is None
+        else verify_ssl_setting.strip().lower() in {"1", "true", "yes"}
+    )
+
+    if ca_cert_path and "-----BEGIN CERTIFICATE-----" in ca_cert_path:
+        ca_cert = ca_cert_path.replace("\\n", "\n")
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".pem", delete=False, encoding="ascii"
+        ) as cert_file:
+            cert_file.write(ca_cert)
+            ca_cert_path = cert_file.name
+            temporary_ca_path = ca_cert_path
 
     connect_args = dict(
         host=host,
@@ -30,22 +47,27 @@ def get_connection():
         database=get_required_env("MYSQL_DATABASE"),
         charset="utf8mb4",
         autocommit=False,
+        use_pure=True,
     )
 
     # Aiven MySQL requires TLS and a CA certificate for secure connections.
     if host.endswith(".aivencloud.com"):
-        if not ca_cert_path:
+        if verify_ssl and not ca_cert_path:
             raise RuntimeError(
                 "Aiven MySQL requires MYSQL_SSL_CA to be set to the CA certificate file path. "
                 "Add it to your .env or GitHub Actions secrets."
             )
+        if verify_ssl and "-----BEGIN CERTIFICATE-----" not in ca_cert_path and not os.path.isfile(ca_cert_path):
+            raise RuntimeError(f"MYSQL_SSL_CA file does not exist: {ca_cert_path}")
         connect_args.update(
             {
                 "ssl_disabled": False,
-                "ssl_verify_cert": True,
-                "ssl_ca": ca_cert_path,
+                "ssl_verify_cert": verify_ssl,
+                "ssl_verify_identity": verify_ssl,
             }
         )
+        if verify_ssl:
+            connect_args["ssl_ca"] = ca_cert_path
     elif ca_cert_path:
         connect_args.update(
             {
@@ -55,7 +77,11 @@ def get_connection():
             }
         )
 
-    return mysql.connector.connect(**connect_args)
+    try:
+        return mysql.connector.connect(**connect_args)
+    finally:
+        if temporary_ca_path:
+            os.unlink(temporary_ca_path)
 
 def init_db():
     conn = get_connection()
