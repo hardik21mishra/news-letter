@@ -218,64 +218,37 @@ def build_news_body(articles, recipient_email, subscriber_id):
         safe_summary = escape(str(summary))
         safe_url = escape(str(url), quote=True)
 
-        card_color = card_colors[(count - 1) % len(card_colors)]
-
         story_block = f"""
                 <tr>
                     <td>
                         <div class="article-wrapper">
-                            <table class="article-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: {card_color};">
+                            <!-- SOURCE -->
+                            <div class="article-source">{safe_source}</div>
+                            
+                            <!-- TITLE -->
+                            <a href="{safe_url}">
+                                <h2 class="article-title">{safe_title}</h2>
+                            </a>
+                            
+                            <!-- SUMMARY -->
+                            <p class="article-summary">
+                                <a href="{safe_url}" style="color: inherit; text-decoration: none;">
+                                    {safe_summary}
+                                </a>
+                            </p>
+                            
+                            <!-- META & LINK -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" class="article-bottom">
                                 <tr>
-                                    <td>
-                                        <div class="article-inner">
-                                            
-                                            <!-- ARTICLE META -->
-                                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                                                <tr>
-                                                    <td>
-                                                        <div class="article-meta">
-                                                            <span class="article-number">{count:02d}</span>
-                                                            <span class="article-category">{safe_category}</span>
-                                                            <span class="article-date">{published_date}</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                
-                                                <!-- ARTICLE TITLE -->
-                                                <tr>
-                                                    <td>
-                                                        <a href="{safe_url}">
-                                                            <div class="article-title">{safe_title}</div>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                                
-                                                <!-- ARTICLE SUMMARY -->
-                                                <tr>
-                                                    <td>
-                                                        <div class="article-summary">{safe_summary}</div>
-                                                    </td>
-                                                </tr>
-                                                
-                                                <!-- ARTICLE FOOTER -->
-                                                <tr>
-                                                    <td>
-                                                        <table class="article-bottom" width="100%" cellpadding="0" cellspacing="0" border="0">
-                                                            <tr>
-                                                                <td align="left">
-                                                                    <div class="article-source">{safe_source}</div>
-                                                                </td>
-                                                                <td align="right">
-                                                                    <a href="{safe_url}" class="read-story">
-                                                                        Read story <span class="arrow">↗</span>
-                                                                    </a>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
+                                    <td align="left">
+                                        <span class="article-meta-info">
+                                            <span class="category-badge">{safe_category}</span> &middot; {published_date}
+                                        </span>
+                                    </td>
+                                    <td align="right">
+                                        <a href="{safe_url}" class="read-story">
+                                            Read story
+                                        </a>
                                     </td>
                                 </tr>
                             </table>
