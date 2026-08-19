@@ -125,7 +125,7 @@ def fetch_news():
     articles = []
     for feed_url, source in feed_links.items():
         feed = feedparser.parse(feed_url)
-        for entry in feed.entries[:3]:
+        for entry in feed.entries[:1]:
             description = (
                 entry.get("summary")
                 or entry.get("description")
