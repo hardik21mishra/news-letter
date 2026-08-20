@@ -3,10 +3,9 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 IST = ZoneInfo("Asia/Kolkata")
-ARTICLE_AGE_DAYS = 2
+ARTICLE_AGE_DAYS = 2   # only news articles which published in last 2 days are considered
 
 def clean_articles(articles):
-    """Remove undated, outdated, and duplicate fetched articles."""
     original_count = len(articles)
 
     articles_df = pd.DataFrame(articles).copy()

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import Response
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -6,6 +7,7 @@ from send_email import build_newsletter_mails, send_to_all_subscribers, render_e
 from apscheduler.schedulers.background import BackgroundScheduler
 from mailer import send_single_email
 from db import add_subscriber, unsubscribe_subscriber , get_marked_articles
+from google_sheets import download_sheet_xlsx
 import uvicorn
 
 app = FastAPI()
@@ -104,6 +106,16 @@ def send_email_endpoint(request: SendEmailRequest):
         return {
             "message": f"Email(s) scheduled for {len(request.emails)} recipient(s) at {send_at.isoformat()}"
         }
+
+@app.get("/get_sheet")
+def download_sheet():
+    return Response(
+        content=download_sheet_xlsx(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": 'attachment; filename="newsletter.xlsx"'
+        },
+    )
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

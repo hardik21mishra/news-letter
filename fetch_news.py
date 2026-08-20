@@ -9,45 +9,31 @@ from email.utils import parsedate_to_datetime
 feed_links = {
     "https://www.infoq.com/feed/": "InfoQ",
     "https://martinfowler.com/feed.atom": "Martin Fowler",
-    "https://queue.acm.org/rss/": "ACM Queue",
     "https://lwn.net/headlines/rss": "LWN.net",
     "https://netflixtechblog.com/feed": "Netflix TechBlog",
     "https://blog.cloudflare.com/rss/": "Cloudflare Blog",
     "https://code.fb.com/feed/": "Meta Engineering",
     "https://github.blog/feed/": "GitHub Blog",
 
-    "https://engineering.linkedin.com/blog.rss.html": "LinkedIn Engineering",
     "https://dropbox.tech/feed": "Dropbox Tech",
     "https://stripe.com/blog/feed.rss": "Stripe Engineering",
     "https://engineering.atspotify.com/feed/": "Spotify Engineering",
-    "https://www.datadoghq.com/blog/rss/": "Datadog Engineering",
     "https://engineering.salesforce.com/feed/": "Salesforce Engineering",
-    "https://www.twilio.com/en-us/blog/rss.xml": "Twilio Engineering",
-
 
     "https://aws.amazon.com/blogs/aws/feed/": "AWS",
-    "https://cloud.google.com/blog/products/rss/": "Google Cloud",
     "https://www.cncf.io/feed/": "CNCF",
     "https://kubernetes.io/feed.xml": "Kubernetes",
     "https://istio.io/latest/feed.xml": "Istio",
     "https://www.hashicorp.com/blog/feed.xml": "HashiCorp",
-    "https://grafana.com/blog/rss/": "Grafana Labs",
-    "https://prometheus.io/feed.xml": "Prometheus",
     "https://www.elastic.co/blog/feed": "Elastic",
-    "https://helm.sh/feed.xml": "Helm",
     "https://thenewstack.io/feed/": "The New Stack",
 
     "https://openai.com/news/rss.xml": "OpenAI",
     "https://huggingface.co/blog/feed.xml": "Hugging Face",
     "https://research.google/blog/rss/": "Google Research",
-    "https://blogs.microsoft.com/ai/feed/": "Microsoft AI",
-    "https://www.anthropic.com/news/rss.xml": "Anthropic",
-    "https://pytorch.org/feed.xml": "PyTorch",
-    "https://www.tensorflow.org/feed.xml": "TensorFlow",
     "https://engineering.fb.com/category/ai/feed/": "Meta AI Engineering",
     "https://developer.nvidia.com/blog/feed": "NVIDIA",
 
-    "https://www.cockroachlabs.com/blog/rss.xml": "CockroachDB",
     "https://www.timescale.com/blog/rss/": "TimescaleDB",
     "https://planet.postgresql.org/rss20.xml": "Planet PostgreSQL",
     "https://redis.com/feed/": "Redis",
@@ -55,8 +41,6 @@ feed_links = {
 
     "https://googleprojectzero.blogspot.com/feeds/posts/default": "Google Project Zero",
     "https://feeds.feedburner.com/TheHackersNews": "The Hacker News",
-    "https://unit42.paloaltonetworks.com/feed/": "Palo Alto Unit 42",
-    "https://blog.talosintelligence.com/feeds/posts/default": "Cisco Talos",
     "https://www.schneier.com/feed/atom/": "Schneier on Security",
 
     "https://go.dev/blog/feed.atom": "Go Blog",
@@ -64,14 +48,14 @@ feed_links = {
     "https://v8.dev/blog.atom": "V8 JavaScript Engine",
     "https://developer.chrome.com/feed.xml": "Chrome Developers",
     "https://webkit.org/feed/": "WebKit",
-    "https://blog.jetbrains.com/feed/": "JetBrains Blog",
     "https://planet.kernel.org/rss20.xml": "Planet Kernel",
     "https://planet.python.org/rss20.xml": "Planet Python",
 
     "https://medium.com/feed/tag/artificial-intelligence": "Medium",
     "https://medium.com/feed/tag/machine-learning": "Medium",
+    "https://blog.jetbrains.com/feed/": "JetBrains Blog",
+    "https://unit42.paloaltonetworks.com/feed/": "Palo Alto Unit 42",
     "https://medium.com/feed/tag/software-engineering": "Medium",
-    "https://medium.com/feed/tag/programming": "Medium",
     "https://medium.com/feed/tag/cloud-computing": "Medium",
     "https://medium.com/feed/tag/devops": "Medium",
     "https://medium.com/feed/tag/kubernetes": "Medium",
@@ -92,9 +76,8 @@ def normalize_published_date(date_string):
     try:
         dt = parsedate_to_datetime(date_string)
 
-        # Convert RSS timezone → IST
+        # Convert RSS timezone -> IST
         dt = dt.astimezone(IST)
-
         # Remove timezone information because MySQL DATETIME
         # stores only date and time
         return dt.replace(tzinfo=None)
@@ -111,7 +94,7 @@ def clean_text(text):
 
     text = text.replace("\n", " ").replace("\r", " ").replace("\t", " ")
 
-    # strip all quote marks (straight + curly) instead of converting them,
+    # strip all quote marks (straight + curly)
     text = re.sub(r'["“”‘’]', '', text)
 
     text = re.sub(r'\s+([.,!?;:])', r'\1', text)      # no space before punctuation
@@ -125,7 +108,7 @@ def fetch_news():
     articles = []
     for feed_url, source in feed_links.items():
         feed = feedparser.parse(feed_url)
-        for entry in feed.entries[:1]:
+        for entry in feed.entries[:2]: #fetch only 2 articles(newest) from each source
             description = (
                 entry.get("summary")
                 or entry.get("description")
@@ -153,7 +136,7 @@ def fetch_news():
                     or "Date not available"
                 ),
                 "link": entry.get("link", ""),
-                "summary": None,
+                "summary": None, 
                 "category": rss_category
             }  
             articles.append(article)

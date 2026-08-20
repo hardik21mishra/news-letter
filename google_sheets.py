@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import gspread
+from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
 from db import get_connection
 # from fetch_news import fetch_sum_save
@@ -25,19 +26,29 @@ def get_sheet_id():
         raise RuntimeError("GOOGLE_SHEET_ID environment variable not found. Add it to your environment or GitHub Actions secrets.")
     return sheet_id
 
+def get_credentials():
+    if os.path.exists("credentials.json"):
+        return Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
+
+    creds_json_raw = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+    if not creds_json_raw:
+        raise RuntimeError("Neither credentials.json nor GOOGLE_SERVICE_ACCOUNT_JSON was found. Add the Google service account secret for GitHub Actions.")
+    return Credentials.from_service_account_info(json.loads(creds_json_raw), scopes=SCOPES)
+
 def get_sheet():
     sheet_id = get_sheet_id()
-
-    if os.path.exists("credentials.json"):
-        creds = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
-    else:
-        creds_json_raw = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
-        if not creds_json_raw:
-            raise RuntimeError("Neither credentials.json nor GOOGLE_SERVICE_ACCOUNT_JSON was found. Add the Google service account secret for GitHub Actions.")
-        creds_json = json.loads(creds_json_raw)
-        creds = Credentials.from_service_account_info(creds_json, scopes=SCOPES)
+    creds = get_credentials()
     client = gspread.authorize(creds)
     return client.open_by_key(sheet_id).sheet1  # first tab
+
+def download_sheet_xlsx():
+    sheet_id = get_sheet_id()
+    session = AuthorizedSession(get_credentials())
+    response = session.get(
+        f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx"
+    )
+    response.raise_for_status()
+    return response.content
 
 def export_articles_to_sheet():
     """Overwrites the sheet with today's fetched articles + empty Mark column."""
