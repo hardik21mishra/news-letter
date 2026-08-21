@@ -207,6 +207,12 @@ def build_news_body(articles, recipient_email, subscriber_id):
             continue
 
         url = article.get("url") or "#"
+        article_id = article.get("id")
+        tracking_url = (
+            f"{BASE_URL}/track/{subscriber_id}/{article_id}"
+            if BASE_URL and subscriber_id and article_id
+            else url
+        )
         category = (article.get("category") or "TECH NEWS").upper()
         source = (article.get("source") or "UNKNOWN SOURCE")
         summary = (article.get("summary") or "")
@@ -216,7 +222,7 @@ def build_news_body(articles, recipient_email, subscriber_id):
         safe_category = escape(str(category))
         safe_source = escape(str(source))
         safe_summary = escape(str(summary))
-        safe_url = escape(str(url), quote=True)
+        safe_url = escape(str(tracking_url), quote=True)
 
         story_block = f"""
                 <tr>

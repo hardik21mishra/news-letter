@@ -124,6 +124,17 @@ def init_db():
         )
     """)
 
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS newsletter_clicks (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            subscriber_id INT NOT NULL,
+            article_id INT NOT NULL,
+            clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (subscriber_id) REFERENCES subscribers(id),
+            FOREIGN KEY (article_id) REFERENCES articles(id)
+        )
+    """)
+
     conn.commit()
     cur.close()
     conn.close()
@@ -201,6 +212,69 @@ def get_marked_articles(mark_type):
     conn.close()
     return rows
 
+def record_newsletter_click(subscriber_id, article_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO newsletter_clicks (subscriber_id, article_id)
+        VALUES (%s, %s)
+    """, (subscriber_id, article_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def track_newsletter_click(subscriber_id, article_id):
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+    cur.execute("""
+        SELECT articles.url, articles.category, subscribers.interests
+        FROM articles
+        JOIN subscribers ON subscribers.id = %s
+        WHERE articles.id = %s
+    """, (subscriber_id, article_id))
+    row = cur.fetchone()
+    if not row:
+        cur.close()
+        conn.close()
+        return None
+
+    try:
+        interests = json.loads(row["interests"] or "[]")
+    except (TypeError, json.JSONDecodeError):
+        interests = []
+    if not isinstance(interests, list):
+        interests = []
+
+    category = (row["category"] or "").strip()
+    if category and not any(
+        str(interest).strip().lower() == category.lower()
+        for interest in interests
+    ):
+        interests.append(category)
+
+    cur.execute("""
+        INSERT INTO newsletter_clicks (subscriber_id, article_id)
+        VALUES (%s, %s)
+    """, (subscriber_id, article_id))
+    cur.execute("""
+        UPDATE subscribers
+        SET interests = %s
+        WHERE id = %s
+    """, (json.dumps(interests), subscriber_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return row["url"]
+
+def get_article_url(article_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT url FROM articles WHERE id = %s", (article_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row[0] if row else None
+
 def add_subscriber(name, email, contact_no, interests):
     conn = get_connection()
     cur = conn.cursor()
@@ -239,6 +313,15 @@ def get_subscriber_emails(active_only=True):
     cur.close()
     conn.close()
     return rows
+
+def get_subscriber_id_by_email(email):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM subscribers WHERE email = %s", (email,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row[0] if row else None
 
 def unsubscribe_subscriber(user_id):
     conn = get_connection()

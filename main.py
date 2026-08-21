@@ -1,12 +1,18 @@
 from fastapi import FastAPI
-from fastapi.responses import Response
+from fastapi.responses import RedirectResponse, Response
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timezone
 from typing import List, Optional
 from send_email import build_newsletter_mails, send_to_all_subscribers, render_email_body
 from apscheduler.schedulers.background import BackgroundScheduler
 from mailer import send_single_email
-from db import add_subscriber, unsubscribe_subscriber , get_marked_articles
+from db import (
+    add_subscriber,
+    get_marked_articles,
+    get_subscriber_id_by_email,
+    track_newsletter_click,
+    unsubscribe_subscriber,
+)
 from google_sheets import download_sheet_xlsx
 import uvicorn
 
@@ -55,6 +61,14 @@ def unsubscribe(user_id: int):
         "message": "You have been successfully unsubscribed."
     }
 
+@app.get("/track/{subscriber_id}/{article_id}")
+def track_click(subscriber_id: int, article_id: int):
+    article_url = track_newsletter_click(subscriber_id, article_id)
+    if not article_url:
+        return Response(content="Subscriber or article not found", status_code=404)
+
+    return RedirectResponse(url=article_url, status_code=307)
+
 def broadcast_now():
     results = []
     for subject, body, html_email in build_newsletter_mails():
@@ -80,8 +94,9 @@ def broadcast_endpoint(request: BroadcastRequest):
 def send_on_demand(emails):
     results = []
     for email in emails:
+        subscriber_id = get_subscriber_id_by_email(email)
         for subject, body, html_email in build_newsletter_mails():
-            rendered_body = render_email_body(body, email, None, html_email)
+            rendered_body = render_email_body(body, email, subscriber_id, html_email)
             success = send_single_email(email, subject, rendered_body, html_email)
             results.append({"email": email, "subject": subject, "sent": success})
     return results

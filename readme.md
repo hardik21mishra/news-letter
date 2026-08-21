@@ -181,7 +181,7 @@ MYSQL_SSL_VERIFY_CERT=true
 # Google Sheets
 GOOGLE_SHEET_ID=your-google-sheet-id
 
-# Email
+# Email (Gmail SMTP)
 SENDER_EMAIL=your-gmail-address
 EMAIL_APP_PASSWORD=your-gmail-app-password
 
@@ -212,6 +212,7 @@ For deployments where `credentials.json` is not available, the service-account J
 The email functionality uses Gmail SMTP.
 
 You need to use a Gmail App Password for `EMAIL_APP_PASSWORD`. Your normal Gmail account password will not work for this SMTP login.
+Use a public `BASE_URL` when testing click redirects from a received email.
 
 ## Database
 
@@ -222,6 +223,31 @@ The main tables are:
 - `articles` — stores the articles, summaries, categories, and related timestamps.
 - `selections` — stores the curator's article selections.
 - `subscribers` — stores subscriber information and whether each subscriber is active.
+- `newsletter_clicks` — stores subscriber/article click events and timestamps.
+
+FastAPI records a click through `GET /track/{subscriber_id}/{article_id}`, then
+redirects to the original URL from `articles`.
+
+To inspect recent clicks:
+
+```sql
+SELECT *
+FROM newsletter_clicks
+ORDER BY clicked_at DESC;
+```
+
+To show subscriber interest by article category:
+
+```sql
+SELECT
+   c.subscriber_id,
+   a.category,
+   COUNT(*) AS click_count
+FROM newsletter_clicks AS c
+JOIN articles AS a ON a.id = c.article_id
+GROUP BY c.subscriber_id, a.category
+ORDER BY c.subscriber_id, click_count DESC;
+```
 
 ## Project structure
 
