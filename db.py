@@ -125,13 +125,14 @@ def init_db():
     """)
 
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS newsletter_clicks (
+        CREATE TABLE IF NOT EXISTS analytics (
             id INT AUTO_INCREMENT PRIMARY KEY,
             subscriber_id INT NOT NULL,
-            article_id INT NOT NULL,
-            clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (subscriber_id) REFERENCES subscribers(id),
-            FOREIGN KEY (article_id) REFERENCES articles(id)
+            interest VARCHAR(255) NOT NULL,
+            click_count INT NOT NULL DEFAULT 0,
+            last_clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_subscriber_interest (subscriber_id, interest),
+            FOREIGN KEY (subscriber_id) REFERENCES subscribers(id)
         )
     """)
 
@@ -212,17 +213,6 @@ def get_marked_articles(mark_type):
     conn.close()
     return rows
 
-def record_newsletter_click(subscriber_id, article_id):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO newsletter_clicks (subscriber_id, article_id)
-        VALUES (%s, %s)
-    """, (subscriber_id, article_id))
-    conn.commit()
-    cur.close()
-    conn.close()
-
 def track_newsletter_click(subscriber_id, article_id):
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
@@ -252,10 +242,15 @@ def track_newsletter_click(subscriber_id, article_id):
     ):
         interests.append(category)
 
-    cur.execute("""
-        INSERT INTO newsletter_clicks (subscriber_id, article_id)
-        VALUES (%s, %s)
-    """, (subscriber_id, article_id))
+    if category:
+        cur.execute("""
+            INSERT INTO analytics
+                (subscriber_id, interest, click_count, last_clicked_at)
+            VALUES (%s, %s, 1, CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY UPDATE
+                click_count = click_count + 1,
+                last_clicked_at = CURRENT_TIMESTAMP
+        """, (subscriber_id, category))
     cur.execute("""
         UPDATE subscribers
         SET interests = %s

@@ -13,7 +13,7 @@ from db import (
     track_newsletter_click,
     unsubscribe_subscriber,
 )
-from google_sheets import download_sheet_xlsx
+from google_sheets import download_sheet_xlsx, get_sheet_id
 import uvicorn
 
 app = FastAPI()
@@ -131,6 +131,11 @@ def download_sheet():
             "Content-Disposition": 'attachment; filename="newsletter.xlsx"'
         },
     )
+
+@app.get("/sheet_link")
+def open_curator_sheet():
+    sheet_url = f"https://docs.google.com/spreadsheets/d/{get_sheet_id()}/edit"
+    return RedirectResponse(url=sheet_url, status_code=307)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

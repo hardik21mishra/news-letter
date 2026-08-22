@@ -15,12 +15,6 @@ load_dotenv()
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 
-# Temporarily disabled to allow the scheduled newsletter job to run before the app is publicly deployed.
-# Once the backend is live, set BASE_URL to the public app URL, e.g. https://newsletter.example.com
-# BASE_URL = os.getenv(
-#     "BASE_URL",
-#     "http://127.0.0.1:8000"
-# )
 BASE_URL = os.getenv("BASE_URL") or "http://127.0.0.1:8000"
 
 HTML_HEAD = """<!DOCTYPE html>
