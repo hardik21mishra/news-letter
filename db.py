@@ -188,14 +188,16 @@ def mark_article(article_id, mark_type):
     conn.close()
 
 def get_marked_articles(mark_type):
+    today = datetime.now(timezone.utc).date()
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
     cur.execute("""
         SELECT articles.* FROM selections
         JOIN articles ON articles.id = selections.article_id
         WHERE selections.mark_type = %s
+          AND DATE(selections.created_at) = %s
         ORDER BY articles.published_at DESC, articles.fetched_at DESC
-    """, (mark_type,))
+    """, (mark_type, today))
     rows = cur.fetchall()
     cur.close()
     conn.close()
