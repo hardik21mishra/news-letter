@@ -127,11 +127,12 @@ def init_db():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS analytics (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            subscriber_id INT NOT NULL,
+            subscriber_id INT NULL,
             interest VARCHAR(255) NOT NULL,
+            platform VARCHAR(20) NOT NULL DEFAULT 'email',
             click_count INT NOT NULL DEFAULT 0,
             last_clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE KEY unique_subscriber_interest (subscriber_id, interest),
+            UNIQUE KEY unique_subscriber_interest_platform (subscriber_id, interest, platform),
             FOREIGN KEY (subscriber_id) REFERENCES subscribers(id)
         )
     """)
@@ -213,25 +214,50 @@ def get_marked_articles(mark_type):
     conn.close()
     return rows
 
-def track_newsletter_click(subscriber_id, article_id):
+def get_selected_articles():
+    today = datetime.now(timezone.utc).date()
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
     cur.execute("""
-        SELECT articles.url, articles.category, subscribers.interests
+        SELECT articles.*, selections.mark_type
+        FROM selections
+        JOIN articles ON articles.id = selections.article_id
+        WHERE selections.mark_type IN ('news', 'tech_of_week', 'topic_of_week')
+          AND DATE(selections.created_at) = %s
+        ORDER BY articles.published_at DESC, articles.fetched_at DESC
+    """, (today,))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+def track_newsletter_click(subscriber_id, article_id, platform="email"):
+    platform = platform.lower()
+    if platform not in {"email", "telegram", "discord"}:
+        platform = "email"
+    analytics_subscriber_id = subscriber_id if platform == "email" else None
+
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+    cur.execute("""
+         SELECT articles.url, articles.category, subscribers.interests,
+             subscribers.id AS subscriber_id
         FROM articles
-        JOIN subscribers ON subscribers.id = %s
+        LEFT JOIN subscribers ON subscribers.id = %s
         WHERE articles.id = %s
     """, (subscriber_id, article_id))
     row = cur.fetchone()
-    if not row:
+    if not row or (platform == "email" and row.get("subscriber_id") is None):
         cur.close()
         conn.close()
         return None
 
-    try:
-        interests = json.loads(row["interests"] or "[]")
-    except (TypeError, json.JSONDecodeError):
-        interests = []
+    interests = []
+    if row["interests"]:
+        try:
+            interests = json.loads(row["interests"])
+        except (TypeError, json.JSONDecodeError):
+            pass
     if not isinstance(interests, list):
         interests = []
 
@@ -244,18 +270,29 @@ def track_newsletter_click(subscriber_id, article_id):
 
     if category:
         cur.execute("""
-            INSERT INTO analytics
-                (subscriber_id, interest, click_count, last_clicked_at)
-            VALUES (%s, %s, 1, CURRENT_TIMESTAMP)
-            ON DUPLICATE KEY UPDATE
-                click_count = click_count + 1,
-                last_clicked_at = CURRENT_TIMESTAMP
-        """, (subscriber_id, category))
-    cur.execute("""
-        UPDATE subscribers
-        SET interests = %s
-        WHERE id = %s
-    """, (json.dumps(interests), subscriber_id))
+            SELECT id FROM analytics
+            WHERE subscriber_id <=> %s AND interest = %s AND platform = %s
+            FOR UPDATE
+        """, (analytics_subscriber_id, category, platform))
+        existing = cur.fetchone()
+        if existing:
+            cur.execute("""
+                UPDATE analytics
+                SET click_count = click_count + 1, last_clicked_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (existing["id"],))
+        else:
+            cur.execute("""
+                INSERT INTO analytics
+                    (subscriber_id, interest, platform, click_count, last_clicked_at)
+                VALUES (%s, %s, %s, 1, CURRENT_TIMESTAMP)
+            """, (analytics_subscriber_id, category, platform))
+    if subscriber_id:
+        cur.execute("""
+            UPDATE subscribers
+            SET interests = %s
+            WHERE id = %s
+        """, (json.dumps(interests), subscriber_id))
     conn.commit()
     cur.close()
     conn.close()

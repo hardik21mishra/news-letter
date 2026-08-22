@@ -76,7 +76,7 @@ This pipeline:
 1. Reads the marks from the Google Sheet.
 2. Saves the selected articles in the MySQL `selections` table.
 3. Builds the newsletter using those selections.
-4. Sends the newsletter to active subscribers through Gmail SMTP.
+4. Sends the newsletter to active subscribers through Gmail SMTP and publishes selected articles to Telegram and Discord.
 
 ## FastAPI
 
@@ -115,7 +115,7 @@ http://127.0.0.1:8000/docs
 | POST | `/subscribe` | Adds a new subscriber. |
 | GET | `/unsubscribe/{user_id}` | Deactivates a subscriber. |
 | POST | `/broadcast` | Sends the newsletter immediately or schedules it. |
-| POST | `/send-email` | Sends the newsletter to specific email addresses immediately or schedules it. |
+| POST | `/send-email` | Sends the newsletter to the specified email addresses immediately or on a schedule. |
 | GET | `/get_sheet` | Downloads the current Google Sheet as an Excel file. |
 
 For example, to download the curator sheet locally:
@@ -185,6 +185,11 @@ GOOGLE_SHEET_ID=your-google-sheet-id
 SENDER_EMAIL=your-gmail-address
 EMAIL_APP_PASSWORD=your-gmail-app-password
 
+# Telegram and Discord channels
+TELEGRAM_TOKEN=your-telegram-bot-token
+TELEGRAM_CHAT_ID=your-telegram-chat-id
+DISCORD_WEBHOOK_URL=your-discord-webhook-url
+
 # Optional: public URL used in unsubscribe links
 BASE_URL=http://127.0.0.1:8000
 
@@ -214,6 +219,23 @@ The email functionality uses Gmail SMTP.
 You need to use a Gmail App Password for `EMAIL_APP_PASSWORD`. Your normal Gmail account password will not work for this SMTP login.
 Use a public `BASE_URL` when testing click redirects from a received email.
 
+### One-time analytics migration
+
+If the `analytics` table already exists, run this once in MySQL Workbench before starting the updated application:
+
+```sql
+ALTER TABLE analytics
+   MODIFY subscriber_id INT NULL,
+   ADD COLUMN platform VARCHAR(20) NOT NULL DEFAULT 'email';
+
+ALTER TABLE analytics
+   DROP INDEX unique_subscriber_interest,
+   ADD UNIQUE KEY unique_subscriber_interest_platform
+      (subscriber_id, interest, platform);
+```
+
+The updated `init_db()` definition includes this schema for new installations. The application does not run migration statements automatically.
+
 ## Database
 
 The database is initialized through `init_db()` in `db.py`.
@@ -223,30 +245,27 @@ The main tables are:
 - `articles` — stores the articles, summaries, categories, and related timestamps.
 - `selections` — stores the curator's article selections.
 - `subscribers` — stores subscriber information and whether each subscriber is active.
-- `newsletter_clicks` — stores subscriber/article click events and timestamps.
+- `analytics` — stores click counts by subscriber, category, and platform. Telegram and Discord use shared channel aggregates rather than individual subscribers.
 
 FastAPI records a click through `GET /track/{subscriber_id}/{article_id}`, then
 redirects to the original URL from `articles`.
 
-To inspect recent clicks:
+To inspect subscriber interest analytics:
 
 ```sql
-SELECT *
-FROM newsletter_clicks
-ORDER BY clicked_at DESC;
+SELECT platform, interest, click_count, last_clicked_at
+FROM analytics
+WHERE subscriber_id IS NULL
+ORDER BY platform, click_count DESC;
 ```
 
 To show subscriber interest by article category:
 
 ```sql
-SELECT
-   c.subscriber_id,
-   a.category,
-   COUNT(*) AS click_count
-FROM newsletter_clicks AS c
-JOIN articles AS a ON a.id = c.article_id
-GROUP BY c.subscriber_id, a.category
-ORDER BY c.subscriber_id, click_count DESC;
+SELECT subscriber_id, platform, interest, click_count
+FROM analytics
+WHERE subscriber_id IS NOT NULL
+ORDER BY subscriber_id, platform, click_count DESC;
 ```
 
 ## Project structure

@@ -3,15 +3,23 @@ from fastapi.responses import RedirectResponse, Response
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timezone
 from typing import List, Optional
-from send_email import build_newsletter_mails, send_to_all_subscribers, render_email_body
+from send_email import (
+    BASE_URL,
+    build_newsletter_mails,
+    render_email_body,
+    send_to_all_subscribers,
+)
 from apscheduler.schedulers.background import BackgroundScheduler
 from mailer import send_single_email
+from on_discord import publish_to_discord
+from on_telegram import publish_to_telegram
 from db import (
     add_subscriber,
     get_marked_articles,
     get_subscriber_id_by_email,
     track_newsletter_click,
     unsubscribe_subscriber,
+    get_selected_articles,
 )
 from google_sheets import download_sheet_xlsx, get_sheet_id
 import uvicorn
@@ -32,6 +40,7 @@ class SendEmailRequest(BaseModel):
 
 class BroadcastRequest(BaseModel):
     send_at: datetime | None = None
+    platforms: List[str] = ["email", "telegram", "discord"]
 
 @app.get("/")
 def home():
@@ -62,18 +71,35 @@ def unsubscribe(user_id: int):
     }
 
 @app.get("/track/{subscriber_id}/{article_id}")
-def track_click(subscriber_id: int, article_id: int):
-    article_url = track_newsletter_click(subscriber_id, article_id)
+def track_click(subscriber_id: int, article_id: int, platform: str = "email"):
+    article_url = track_newsletter_click(subscriber_id, article_id, platform)
     if not article_url:
         return Response(content="Subscriber or article not found", status_code=404)
 
     return RedirectResponse(url=article_url, status_code=307)
 
-def broadcast_now():
+def broadcast_now(platforms=None):
+    platforms = platforms or ["email", "telegram", "discord"]
+    selected_articles = get_selected_articles()
     results = []
-    for subject, body, html_email in build_newsletter_mails():
-        send_to_all_subscribers(subject, body, html_email)
-        results.append({"subject": subject, "sent": True})
+    if "email" in platforms:
+        for subject, body, html_email in build_newsletter_mails(selected_articles):
+            send_to_all_subscribers(subject, body, html_email)
+            results.append({"platform": "email", "subject": subject, "sent": True})
+    for platform, sender in (
+        ("telegram", publish_to_telegram),
+        ("discord", publish_to_discord),
+    ):
+        if platform not in platforms:
+            continue
+        sent = 0
+        for selected_article in selected_articles:
+            article = dict(selected_article)
+            article_id = article.get("id")
+            if BASE_URL and article_id:
+                article["url"] = f"{BASE_URL}/track/0/{article_id}?platform={platform}"
+            sent += sender(article)
+        results.append({"platform": platform, "sent": sent, "total": len(selected_articles)})
     return results
 
 @app.post("/broadcast")
@@ -83,19 +109,20 @@ def broadcast_endpoint(request: BroadcastRequest):
     if send_at is not None and send_at.tzinfo is None:
         send_at = send_at.replace(tzinfo=timezone.utc)
     if send_at is None or send_at <= now:
-        results = broadcast_now()
+        results = broadcast_now(request.platforms)
         return {
             "message": "Newsletter broadcast send immediately", "results": results
         }
     else:
-        scheduler.add_job(broadcast_now, "date", run_date=send_at)
+        scheduler.add_job(broadcast_now, "date", run_date=send_at, args=[request.platforms])
         return {"message": f"Newsletter broadcast scheduled for {send_at.isoformat()}"}
 
 def send_on_demand(emails):
     results = []
+    selected_articles = get_selected_articles()
     for email in emails:
         subscriber_id = get_subscriber_id_by_email(email)
-        for subject, body, html_email in build_newsletter_mails():
+        for subject, body, html_email in build_newsletter_mails(selected_articles):
             rendered_body = render_email_body(body, email, subscriber_id, html_email)
             success = send_single_email(email, subject, rendered_body, html_email)
             results.append({"email": email, "subject": subject, "sent": success})
