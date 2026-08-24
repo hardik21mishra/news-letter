@@ -11,13 +11,11 @@ IST = ZoneInfo("Asia/Kolkata")
 from dotenv import load_dotenv
 load_dotenv()
 
-
 def get_required_env(name):
     value = os.getenv(name)
     if value is None or value == "":
         raise RuntimeError(f"Missing required environment variable: {name}")
     return value
-
 
 def get_connection():
     host = get_required_env("MYSQL_HOST")
@@ -200,18 +198,33 @@ def mark_article(article_id, mark_type):
     cur.close()
     conn.close()
 
-def get_marked_articles(mark_type):
+def get_marked_articles(mark_type, date=None):
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
-    cur.execute("""
-        SELECT articles.* FROM selections
-        JOIN articles ON articles.id = selections.article_id
+    query = """
+        SELECT
+            articles.*,
+            selections.created_at AS selected_at
+        FROM selections
+        JOIN articles
+            ON articles.id = selections.article_id
         WHERE selections.mark_type = %s
-        ORDER BY articles.published_at DESC, articles.fetched_at DESC
-    """, (mark_type,))
+    """
+
+    params = [mark_type]
+
+    if date:
+        query += " AND DATE(selections.created_at) = %s"
+        params.append(date)
+
+    query += """
+        ORDER BY selections.created_at DESC
+    """   
+    cur.execute(query, params)
     rows = cur.fetchall()
     cur.close()
     conn.close()
+
     return rows
 
 def get_selected_articles():

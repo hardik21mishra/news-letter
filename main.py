@@ -71,9 +71,7 @@ def analytics_overview(platform: str = "all"):
     cur = conn.cursor(dictionary=True)
 
     try:
-        # ---------------------------------------------------------
         # CATEGORY ANALYTICS
-        # ---------------------------------------------------------
         if platform == "all":
             cur.execute("""
                 SELECT
@@ -109,11 +107,7 @@ def analytics_overview(platform: str = "all"):
         if category_distribution:
             most_popular = category_distribution[0]
 
-        # ---------------------------------------------------------
         # TELEGRAM / DISCORD
-        # ---------------------------------------------------------
-        # These are channel-level analytics.
-        # Individual subscriber analytics are not relevant here.
         if platform in {"telegram", "discord"}:
             return {
                 "platform": platform,
@@ -122,9 +116,7 @@ def analytics_overview(platform: str = "all"):
                 "subscribers": []
             }
 
-        # ---------------------------------------------------------
         # EMAIL / ALL
-        # ---------------------------------------------------------
         cur.execute("""
             SELECT
                 id,
@@ -244,8 +236,8 @@ def get_subscribers():
         conn.close()
   
 @app.get("/news")
-def get_news():
-    return get_marked_articles("news")
+def get_news(date: str | None = None):
+    return get_marked_articles("news", date)
 
 @app.post("/subscribe")
 def subscribe(request: SubscribeRequest):
