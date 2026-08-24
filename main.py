@@ -20,11 +20,25 @@ from db import (
     track_newsletter_click,
     unsubscribe_subscriber,
     get_selected_articles,
+    get_connection,
 )
 from google_sheets import download_sheet_xlsx, get_sheet_id
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 scheduler = BackgroundScheduler()        
 scheduler.start()                       
 
@@ -45,6 +59,189 @@ class BroadcastRequest(BaseModel):
 @app.get("/")
 def home():
     return {"message": "Helloooo, this is my news API"}
+
+@app.get("/analytics/overview")
+def analytics_overview(platform: str = "all"):
+    platform = platform.lower()
+
+    if platform not in {"all", "email", "telegram", "discord"}:
+        return {"error": "Invalid platform"}
+
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # ---------------------------------------------------------
+        # CATEGORY ANALYTICS
+        # ---------------------------------------------------------
+        if platform == "all":
+            cur.execute("""
+                SELECT
+                    interest,
+                    SUM(click_count) AS clicks
+                FROM analytics
+                GROUP BY interest
+                ORDER BY clicks DESC
+            """)
+        else:
+            cur.execute("""
+                SELECT
+                    interest,
+                    SUM(click_count) AS clicks
+                FROM analytics
+                WHERE LOWER(platform) = %s
+                GROUP BY interest
+                ORDER BY clicks DESC
+            """, (platform,))
+
+        category_rows = cur.fetchall()
+
+        category_distribution = [
+            {
+                "interest": row["interest"],
+                "clicks": int(row["clicks"] or 0)
+            }
+            for row in category_rows
+        ]
+
+        most_popular = None
+
+        if category_distribution:
+            most_popular = category_distribution[0]
+
+        # ---------------------------------------------------------
+        # TELEGRAM / DISCORD
+        # ---------------------------------------------------------
+        # These are channel-level analytics.
+        # Individual subscriber analytics are not relevant here.
+        if platform in {"telegram", "discord"}:
+            return {
+                "platform": platform,
+                "category_distribution": category_distribution,
+                "most_popular": most_popular,
+                "subscribers": []
+            }
+
+        # ---------------------------------------------------------
+        # EMAIL / ALL
+        # ---------------------------------------------------------
+        cur.execute("""
+            SELECT
+                id,
+                name,
+                email,
+                interests
+            FROM subscribers
+            WHERE active = TRUE
+            ORDER BY id
+        """)
+
+        subscribers = cur.fetchall()
+
+        subscriber_insights = []
+
+        for subscriber in subscribers:
+
+            if platform == "all":
+                cur.execute("""
+                    SELECT
+                        interest,
+                        platform,
+                        click_count,
+                        last_clicked_at
+                    FROM analytics
+                    WHERE subscriber_id = %s
+                    ORDER BY click_count DESC
+                """, (subscriber["id"],))
+
+            else:
+                cur.execute("""
+                    SELECT
+                        interest,
+                        platform,
+                        click_count,
+                        last_clicked_at
+                    FROM analytics
+                    WHERE subscriber_id = %s
+                      AND LOWER(platform) = %s
+                    ORDER BY click_count DESC
+                """, (subscriber["id"], platform))
+
+            activity = cur.fetchall()
+
+            total_clicks = sum(
+                int(row["click_count"] or 0)
+                for row in activity
+            )
+
+            strongest_interest = None
+
+            if activity:
+                strongest_interest = {
+                    "interest": activity[0]["interest"],
+                    "clicks": int(activity[0]["click_count"] or 0)
+                }
+
+            platform_clicks = {
+                "email": 0,
+                "telegram": 0,
+                "discord": 0
+            }
+
+            for row in activity:
+                row_platform = str(row["platform"]).lower()
+
+                if row_platform in platform_clicks:
+                    platform_clicks[row_platform] += int(
+                        row["click_count"] or 0
+                    )
+
+            subscriber_insights.append({
+                "id": subscriber["id"],
+                "name": subscriber["name"],
+                "email": subscriber["email"],
+                "declared_interests": subscriber["interests"],
+                "total_clicks": total_clicks,
+                "strongest_interest": strongest_interest,
+                "platform_clicks": platform_clicks,
+                "activity": activity
+            })
+
+        return {
+            "platform": platform,
+            "category_distribution": category_distribution,
+            "most_popular": most_popular,
+            "subscribers": subscriber_insights
+        }
+
+    finally:
+        cur.close()
+        conn.close()
+
+@app.get("/subscribers")
+def get_subscribers():
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        cur.execute("""
+            SELECT
+                id,
+                name,
+                email,
+                contact_no,
+                interests,
+                subscribed_at,
+                active
+            FROM subscribers
+            ORDER BY id DESC
+        """)
+
+        return cur.fetchall()
+
+    finally:
+        cur.close()
+        conn.close()
   
 @app.get("/news")
 def get_news():
