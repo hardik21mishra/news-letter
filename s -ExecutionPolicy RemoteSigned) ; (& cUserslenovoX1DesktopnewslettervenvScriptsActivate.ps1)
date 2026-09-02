@@ -1,0 +1,87 @@
+[33mcc24b6d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfixes[m[33m, [m[1;31morigin/analytics[m[33m, [m[1;32manalytics[m[33m)[m mvp ready
+[33ma77e2bd[m made dashboard and add connecting endpoints
+[33mebc4d0c[m add the telegram discord and its analytics as well
+[33m752b11e[m add analytics
+[33m098acea[m record subscriber interest based on clicks
+[33mda71242[m updated the readme file
+[33m9c9b48b[m add sheet download endpoint and some fixes
+[33m1b2c0e3[m set the template
+[33m3756e7e[m testing2...
+[33m7997c20[m testing...
+[33mba80dfc[m fix flow and other fixes
+[33mc2ab9cc[m adding the pipeine 2
+[33m0a726f7[m cron fix 3
+[33m43461a7[m p1 cron fix 2
+[33m216363c[m p1 cron fix
+[33m192cedc[m trial 1 of adding cron pipeline 1
+[33m3c76056[m delete old crons, start fresh from here due to too many errors
+[33ma26cee4[m xyz
+[33m516a752[m add pipeline to cron job
+[33mf34c060[m ....
+[33m250eda6[m debu
+[33m1004c90[m debugg
+[33m88aae75[m debug
+[33mdd02938[m Add database configuration check step -- p1 yml debugging
+[33m0d90915[m ...
+[33m60d6ed7[m ..
+[33m3d23f10[m add cron job for pipeline 1
+[33mc692112[m fix architecture flow , host to aiven from here
+[33md7fb62b[m add data cleaning and some changes
+[33mea52392[m add the date function to send daily, weekly and monthly newsletters
+[33m68890d2[m changed unsubscribe method by id instead of token
+[33mc11a973[m fix unsubscribe and add template
+[33m5e5fe4d[m add category and small correction
+[33md158e9a[m Clean up project and prepare v2
+[33m2f23255[m[33m ([m[1;31morigin/second-version[m[33m, [m[1;32msecond-version[m[33m)[m all the main desired changes done
+[33me50e0e5[m add category attribute in/till fetch, categorize and google sheets, still left to add in selections db and production
+[33m92adb0d[m add endpoints
+[33m123ca95[m majorly remains after this is creating endpoints and adding subscribing feature
+[33m9c3fb75[m load news - store - excel works till here
+[33me70c570[m add db and initial flow build still lot of work
+[33mdfcbde2[m all pre db change
+[33m7bd0f78[m debug try 1
+[33me18e746[m Update news.json [automated]
+[33mf47669a[m Update news.json [automated]
+[33mc91ad26[m Update news.json [automated]
+[33m221a9ff[m merege conflicreslove
+[33m4fea5d5[m Merge branch 'master' of https://github.com/hardik21mishra/news-letter
+[33m3b305e9[m Update news.json [automated]
+[33mcf67e13[m[33m ([m[1;32mcustom-mail[m[33m)[m add the scheduled mail and instant mail feature to particular emails
+[33m5d072ab[m Update news.json [automated]
+[33m2e3453c[m Update news.json [automated]
+[33mc4322b6[m Update news.json [automated]
+[33m6e14505[m fix the cron job time
+[33m70667ca[m Update news.json [automated]
+[33m014f48a[m remove unused db file
+[33m5eb31b2[m requirements add
+[33m12dd44d[m back to txt file
+[33m6031d4d[m news file error resolve
+[33m364a98d[m complete work branch merge in master
+[33mcbebbde[m[33m ([m[1;31morigin/my-template[m[33m, [m[1;32mmy-template[m[33m)[m add the template
+[33m74cbc9c[m Update news.json [automated]
+[33m2cb0cba[m[33m ([m[1;31morigin/subs-db[m[33m, [m[1;32msubs-db[m[33m)[m add subs and post endpoint
+[33m32d26a9[m[33m ([m[1;32mfastapi-integration[m[33m)[m small
+[33me511ca7[m[33m ([m[1;31morigin/fastapi-integration[m[33m)[m small change
+[33m998687c[m Update news.json [automated]
+[33mf40c9a5[m Update news.json [automated]
+[33m61aef12[m small change
+[33m9f27535[m one more change
+[33m12fe632[m one change
+[33m442dfff[m some more fixes and changes
+[33m69249ab[m update
+[33m028d2ef[m add fastapi with categroy filter
+[33m7d3a933[m[33m ([m[1;32mjson-export[m[33m)[m auto commit news.json in github workflows
+[33m51bbe0b[m add json file
+[33m4ebf1d3[m updated readme file
+[33m9f6f0ab[m eight am final set
+[33m8c70c6e[m test automated run, time change
+[33mceeca3f[m final commit before getting the template
+[33ma731d0f[m make some changes
+[33m6452c8d[m add github workflow file
+[33m962abce[m replace telegram with email
+[33m3bcb017[m final commit before mail modifications
+[33m1de0273[m final commit in send_message branch
+[33m272a1e2[m fix the social media
+[33m6b9cc5e[m did some changes undo
+[33meac47ee[m some experimentation with branches
+[33m8bf385a[m first commit

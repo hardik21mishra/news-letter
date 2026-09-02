@@ -1,9 +1,9 @@
 name: Pipeline 2 - Import selections and send newsletter
 
-on:
-  schedule:
-    - cron: "30 11 * * *"
+on: 
   workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-pipeline-2]
 
 permissions:
   contents: read
