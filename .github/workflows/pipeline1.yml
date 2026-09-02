@@ -1,9 +1,9 @@
 name: Pipeline 1 - Fetch and export articles
 
 on:
-  schedule:
-    - cron: "30 23 * * *"
   workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-pipeline-1]
 
 permissions:
   contents: read
