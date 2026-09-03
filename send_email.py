@@ -23,97 +23,54 @@ APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 # )
 BASE_URL = os.getenv("BASE_URL") or "http://127.0.0.1:8000"
 
+# Extract the 'On This Day' item and separate standard articles
+history_fact = "The Mozilla Corporation was established by co-founders Mitchell Baker and Brendan Eich as a taxable subsidiary of the non-profit Mozilla Foundation to better fund, manage, and expand the development of the popular Firefox web browser."
+
+
 HTML_HEAD = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NewsLetter</title>
+    <title>The Tech Newsletter</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #f4f5f7;
-            color: #1d1d1f;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        table {
-            border-collapse: collapse;
-            border-spacing: 0;
-        }
-        a {
-            text-decoration: none;
-        }
-        .wrapper {
-            width: 100%;
-            background-color: #f4f5f7;
-        }
-        .container {
-            width: 100%;
-            max-width: 720px;
-            background-color: #ffffff;
-        }
+        body { margin: 0; padding: 0; background-color: #f4f5f7; color: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        table { border-collapse: collapse; border-spacing: 0; width: 100%; }
+        a { text-decoration: none; }
+        
+        .wrapper { background-color: #f4f5f7; padding: 20px 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; overflow: hidden; }
+        
+        .header { background-color: #000000; padding: 30px 40px; text-align: center; border-bottom: 4px solid #00ff00; }
+        .logo-text { color: #ffffff; font-size: 28px; font-weight: 900; letter-spacing: 1px; margin: 0; font-family: "Courier New", Courier, monospace; text-transform: uppercase; }
+        .logo-accent { color: #00ff00; }
+        .tagline { color: #cccccc; font-size: 13px; margin-top: 8px; font-family: -apple-system, sans-serif; }
+        
+        .intro-section { padding: 40px 40px 30px; }
+        .greeting { font-size: 22px; font-weight: 800; color: #000000; margin: 0 0 15px 0; }
+        .date-text { font-size: 15px; color: #333333; line-height: 1.6; margin: 0 0 20px 0; }
+        
+        .history-section { background-color: #f9f9f9; border-left: 4px solid #00ff00; padding: 15px 20px; }
+        .history-heading { font-size: 14px; font-weight: 800; color: #000000; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0; }
+        .history-text { font-size: 14px; color: #444444; line-height: 1.5; margin: 0; }
 
-        /* HEADER */
-        .nav {
-            padding: 40px 30px;
-            background-color: #ffffff;
-            border-bottom: 1px solid #eaeaea;
-        }
-        .logo {
-            font-size: 26px;
-            line-height: 1;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: #111111;
-        }
-        .edition {
-            padding: 6px 12px;
-            border: 1px solid #dddddd;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: #666666; 
-            text-transform: uppercase;
-        }
+        .article-block { padding: 30px 40px; border-top: 1px solid #eeeeee; }
+        .article-meta { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #666666; margin-bottom: 12px; }
+        .article-category { color: #000000; background-color: #00ff00; padding: 3px 8px; font-weight: 800; margin-right: 8px; display: inline-block; }
+        .article-title { font-size: 24px; font-weight: 800; color: #000000; line-height: 1.3; margin: 0 0 12px 0; letter-spacing: -0.5px; }
+        .article-summary { font-size: 15px; color: #444444; line-height: 1.6; margin: 0 0 15px 0; }
+        .tldr { font-weight: 800; color: #000000; }
+        
+        .read-more-container { text-align: center; margin-top: 25px; margin-bottom: 10px; }
+        .read-more { display: inline-block; font-size: 13px; font-weight: 800; color: #000000; text-transform: uppercase; letter-spacing: 1px; padding: 10px 24px; border: 2px solid #000000; text-decoration: none; transition: background-color 0.2s, color 0.2s; }
 
-        /* ARTICLE CARDS */
-        .article-wrapper { padding: 16px 26px 0; }
-        .article-card { 
-            width: 100%; 
-            border-radius: 4px; 
-            border: 1px solid rgba(255,255,255,0.18); 
-            box-shadow: 0 5px 16px rgba(0,0,0,0.22); 
-        }
-        .article-inner { padding: 28px 30px 26px; }
-        .article-meta { font-size: 9px; line-height: 1.4; padding-bottom: 14px; }
-        .article-number { color: #666d69; font-weight: 800; padding-right: 9px; }
-        .article-category { color: #5148d9; font-weight: 800; letter-spacing: 1.2px; padding-right: 9px; }
-        .article-date { color: #737a75; }
-        .article-title { margin: 0; padding: 0; font-size: 24px; line-height: 1.22; letter-spacing: -0.5px; font-weight: 700; color: #191b1f; }
-        .article-summary { margin: 0; padding-top: 12px; font-size: 13px; line-height: 1.65; color: #555a61; }
-        .article-bottom { margin-top: 23px; padding-top: 15px; border-top: 1px solid rgba(0,0,0,0.08); }
-        .article-source { font-size: 8px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: #686e6a; }
-        .read-story { font-size: 9px; font-weight: 800; color: #363a40; }
-        .arrow { color: #5148d9; padding-left: 3px; }
+        .footer { padding: 40px; background-color: #f9f9f9; text-align: center; border-top: 1px solid #eeeeee; }
+        .footer-text { color: #888888; font-size: 12px; line-height: 1.6; margin: 0; }
+        .footer-links a { color: #555555; text-decoration: underline; margin: 0 10px; }
 
-        /* FOOTER */
-        .footer { padding: 42px 26px 50px; text-align: center; font-size: 9px; line-height: 1.9; color: #858e89; }
-        .footer-brand { font-weight: 800; letter-spacing: 1px; color: #b6beb9; }
-        .footer-links { margin-top: 7px; }
-        .footer-link { color: #929b96; }
-
-        /* MOBILE RESPONSIVENESS */
         @media only screen and (max-width: 600px) {
-            .container { width: 100% !important; }
-            .nav { padding: 30px 20px !important; }
-            .logo { font-size: 22px !important; }
-            .article-wrapper { padding-left: 16px !important; padding-right: 16px !important; padding-top: 13px !important; }
-            .article-inner { padding: 24px 22px 22px !important; }
-            .article-title { font-size: 21px !important; }
-            .article-summary { font-size: 13px !important; }
-            .footer { padding-left: 16px !important; padding-right: 16px !important; }
+            .header, .intro-section, .article-block, .footer { padding-left: 20px !important; padding-right: 20px !important; }
+            .article-title { font-size: 22px !important; }
         }
     </style>
 </head>
@@ -126,20 +83,17 @@ HTML_HEAD = """<!DOCTYPE html>
 
 HTML_FOOTER = """
             </table>
-
+            
             <table class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f5f7;">
                 <tr>
-                    <td>
-                        <div class="footer">
-                            <div class="footer-brand">
-                                NEWSLETTER - SOME DESCRIPTION
-                            </div>
-                            <div class="footer-links">
-                                <a href="{unsubscribe_url}" class="footer-link">Manage interests</a>
-                                &nbsp;&middot;&nbsp;
-                                <a href="{unsubscribe_url}" class="footer-link">Unsubscribe</a>
-                            </div>
-                        </div>
+                    <td class="footer">
+                        <p class="footer-text">
+                            You are receiving this because you subscribed to our tech updates.<br><br>
+                            <span class="footer-links">
+                                <a href="{unsubscribe_url}">Manage Interests</a> | 
+                                <a href="{unsubscribe_url}">Unsubscribe</a>
+                            </span>
+                        </p>
                     </td>
                 </tr>
             </table>
@@ -153,115 +107,98 @@ HTML_FOOTER = """
 
 def format_article_date(raw_date):
     if not raw_date:
-        return "DATE UNKNOWN"
+        return ""
 
     raw_date = str(raw_date).strip()
 
     try:
         date_value = datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
-        return date_value.strftime("%d %b %Y").upper()
+        return date_value.strftime("%b %d, %Y").upper()
     except (ValueError, TypeError):
         pass
 
     try:
         date_value = parsedate_to_datetime(raw_date)
-        return date_value.strftime("%d %b %Y").upper()
+        return date_value.strftime("%b %d, %Y").upper()
     except (ValueError, TypeError):
         pass
 
-    return "DATE UNKNOWN"
+    return ""
 
 def build_news_body(articles, recipient_email, subscriber_id):
-    send_date = datetime.now().strftime("%d %b %Y").upper()
+    current_time = datetime.now()
+    send_date_str = current_time.strftime("%B %d, %Y")
+    
+    standard_articles = []
+    
+    for article in articles:
+        if str(article.get("category", "")).upper() == "HISTORY":
+            history_fact = article.get("summary", history_fact)
+        else:
+            standard_articles.append(article)
 
     unsubscribe_url = f"{BASE_URL}/unsubscribe/{subscriber_id}" if BASE_URL else "#"
-
-    # 1. Start HTML (leaves container table open)
+    
     html_content = HTML_HEAD
+    safe_history = escape(str(history_fact))
 
-    # 2. Add Dynamic Header Row
+    # Intro Section with On This Day Block
     html_content += f"""
                 <tr>
-                    <td class="nav">
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                            <tr>
-                                <td align="left" valign="middle">
-                                    <a href="#" class="logo">NewsLetter</a>
-                                </td>
-                                <td align="right" valign="middle">
-                                    <span class="edition">{send_date}</span>
-                                </td>
-                            </tr>
-                        </table>
+                    <td class="header">
+                        <p class="logo-text">THE <span class="logo-accent">TECH</span> NEWSLETTER</p>
+                        <p class="tagline">Your Dose of Electrifying Tech Content</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="intro-section">
+                        <h2 class="greeting">How are you, @hacker?</h2>
+                        <p class="date-text">🪐 What's happening in tech today, {send_date_str}?</p>
+                        <div class="history-section">
+                            <h3 class="history-heading">On This Day</h3>
+                            <p class="history-text">{safe_history}</p>
+                        </div>
                     </td>
                 </tr>
     """
 
-    # 3. Add Article Cards
-    count = 1
-    card_colors = ["#c9e2ee", "#f0d8b8", "#c9e3d1", "#dfcdea"]
-
-    for article in articles:
+    for article in standard_articles:
         title = article.get("title")
         if not title:
             continue
 
         url = article.get("url") or "#"
-        category = (article.get("category") or "TECH NEWS").upper()
-        source = (article.get("source") or "UNKNOWN SOURCE")
+        category = (article.get("category") or "TECH").upper()
         summary = (article.get("summary") or "")
         published_date = format_article_date(article.get("published_at"))
+        
+        date_display = f" &middot; {published_date}" if published_date else ""
 
         safe_title = escape(str(title))
         safe_category = escape(str(category))
-        safe_source = escape(str(source))
         safe_summary = escape(str(summary))
         safe_url = escape(str(url), quote=True)
 
-        story_block = f"""
+        html_content += f"""
                 <tr>
-                    <td>
-                        <div class="article-wrapper">
-                            <!-- SOURCE -->
-                            <div class="article-source">{safe_source}</div>
-                            
-                            <!-- TITLE -->
-                            <a href="{safe_url}">
-                                <h2 class="article-title">{safe_title}</h2>
-                            </a>
-                            
-                            <!-- SUMMARY -->
-                            <p class="article-summary">
-                                <a href="{safe_url}" style="color: inherit; text-decoration: none;">
-                                    {safe_summary}
-                                </a>
-                            </p>
-                            
-                            <!-- META & LINK -->
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" class="article-bottom">
-                                <tr>
-                                    <td align="left">
-                                        <span class="article-meta-info">
-                                            <span class="category-badge">{safe_category}</span> &middot; {published_date}
-                                        </span>
-                                    </td>
-                                    <td align="right">
-                                        <a href="{safe_url}" class="read-story">
-                                            Read story
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
+                    <td class="article-block">
+                        <div class="article-meta">
+                            <span class="article-category">{safe_category}</span>{date_display}
+                        </div>
+                        <a href="{safe_url}">
+                            <h3 class="article-title">{safe_title}</h3>
+                        </a>
+                        <p class="article-summary">
+                            <span class="tldr">TL;DR</span> {safe_summary}
+                        </p>
+                        <div class="read-more-container">
+                            <a href="{safe_url}" class="read-more">Read More</a>
                         </div>
                     </td>
                 </tr>
         """
-        html_content += story_block
-        count += 1
 
-    # 4. Add Footer (closes container table)
     html_content += HTML_FOOTER.format(unsubscribe_url=unsubscribe_url)
-
     return html_content
 
 def build_tech_of_week_body(pick):
@@ -274,7 +211,6 @@ def render_email_body(body, recipient_email, subscriber_id, html_email):
     if html_email:
         return transform(body(recipient_email, subscriber_id))
     return body
-
 
 def send_to_all_subscribers(subject, body, html_email=True):
     subscribers = get_subscriber_emails()
@@ -315,12 +251,12 @@ def build_newsletter_mails():
 
     mails = [
         (
-            "Your Daily News Brief",
+            "Your Daily Tech Brief",
             lambda email, subscriber_id: build_news_body(
-            news_articles,
-            email,
-            subscriber_id
-        ),
+                news_articles,
+                email,
+                subscriber_id
+            ),
             True
         )
     ]
