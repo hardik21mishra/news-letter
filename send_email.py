@@ -23,10 +23,6 @@ APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 # )
 BASE_URL = os.getenv("BASE_URL") or "http://127.0.0.1:8000"
 
-# Extract the 'On This Day' item and separate standard articles
-history_fact = "The Mozilla Corporation was established by co-founders Mitchell Baker and Brendan Eich as a taxable subsidiary of the non-profit Mozilla Foundation to better fund, manage, and expand the development of the popular Firefox web browser."
-
-
 HTML_HEAD = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -128,6 +124,9 @@ def format_article_date(raw_date):
 def build_news_body(articles, recipient_email, subscriber_id):
     current_time = datetime.now()
     send_date_str = current_time.strftime("%B %d, %Y")
+
+    # Extract the 'On This Day' item and separate standard articles
+    history_fact = "The Mozilla Corporation was established by co-founders Mitchell Baker and Brendan Eich as a taxable subsidiary of the non-profit Mozilla Foundation to better fund, manage, and expand the development of the popular Firefox web browser."
     
     standard_articles = []
     
