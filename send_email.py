@@ -126,7 +126,7 @@ def build_news_body(articles, recipient_email, subscriber_id):
     send_date_str = current_time.strftime("%B %d, %Y")
 
     # Extract the 'On This Day' item and separate standard articles
-    history_fact = "The Mozilla Corporation was established by co-founders Mitchell Baker and Brendan Eich as a taxable subsidiary of the non-profit Mozilla Foundation to better fund, manage, and expand the development of the popular Firefox web browser."
+    history_fact = "The American search engine company Google Inc. was formally established as founders Sergey Brin and Larry Page filed incorporation papers"
     
     standard_articles = []
     
