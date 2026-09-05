@@ -126,8 +126,7 @@ def build_news_body(articles, recipient_email, subscriber_id):
     send_date_str = current_time.strftime("%B %d, %Y")
 
     # Extract the 'On This Day' item and separate standard articles
-    history_fact = "The American search engine company Google Inc. was formally established as founders Sergey Brin and Larry Page filed incorporation papers"
-    
+    history_fact = "the Apple Lisa was introduced as one of the first personal computers featuring a graphical user interface (GUI) and a computer mouse"
     standard_articles = []
     
     for article in articles:
