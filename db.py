@@ -11,13 +11,11 @@ IST = ZoneInfo("Asia/Kolkata")
 from dotenv import load_dotenv
 load_dotenv()
 
-
 def get_required_env(name):
     value = os.getenv(name)
     if value is None or value == "":
         raise RuntimeError(f"Missing required environment variable: {name}")
     return value
-
 
 def get_connection():
     host = get_required_env("MYSQL_HOST")
@@ -124,6 +122,19 @@ def init_db():
         )
     """)
 
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS analytics (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            subscriber_id INT NULL,
+            interest VARCHAR(255) NOT NULL,
+            platform VARCHAR(20) NOT NULL DEFAULT 'email',
+            click_count INT NOT NULL DEFAULT 0,
+            last_clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_subscriber_interest_platform (subscriber_id, interest, platform),
+            FOREIGN KEY (subscriber_id) REFERENCES subscribers(id)
+        )
+    """)
+
     conn.commit()
     cur.close()
     conn.close()
@@ -187,21 +198,127 @@ def mark_article(article_id, mark_type):
     cur.close()
     conn.close()
 
-def get_marked_articles(mark_type):
+def get_marked_articles(mark_type, date=None):
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+    query = """
+        SELECT
+            articles.*,
+            selections.created_at AS selected_at
+        FROM selections
+        JOIN articles
+            ON articles.id = selections.article_id
+        WHERE selections.mark_type = %s
+    """
+
+    params = [mark_type]
+
+    if date:
+        query += " AND DATE(selections.created_at) = %s"
+        params.append(date)
+
+    query += """
+        ORDER BY selections.created_at DESC
+    """   
+    cur.execute(query, params)
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return rows
+
+def get_selected_articles():
     today = datetime.now(timezone.utc).date()
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
     cur.execute("""
-        SELECT articles.* FROM selections
+        SELECT articles.*, selections.mark_type
+        FROM selections
         JOIN articles ON articles.id = selections.article_id
-        WHERE selections.mark_type = %s
+        WHERE selections.mark_type IN ('news', 'tech_of_week', 'topic_of_week')
           AND DATE(selections.created_at) = %s
         ORDER BY articles.published_at DESC, articles.fetched_at DESC
-    """, (mark_type, today))
+    """, (today,))
     rows = cur.fetchall()
     cur.close()
     conn.close()
     return rows
+
+def track_newsletter_click(subscriber_id, article_id, platform="email"):
+    platform = platform.lower()
+    if platform not in {"email", "telegram", "discord"}:
+        platform = "email"
+    analytics_subscriber_id = subscriber_id if platform == "email" else None
+
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+    cur.execute("""
+         SELECT articles.url, articles.category, subscribers.interests,
+             subscribers.id AS subscriber_id
+        FROM articles
+        LEFT JOIN subscribers ON subscribers.id = %s
+        WHERE articles.id = %s
+    """, (subscriber_id, article_id))
+    row = cur.fetchone()
+    if not row or (platform == "email" and row.get("subscriber_id") is None):
+        cur.close()
+        conn.close()
+        return None
+
+    interests = []
+    if row["interests"]:
+        try:
+            interests = json.loads(row["interests"])
+        except (TypeError, json.JSONDecodeError):
+            pass
+    if not isinstance(interests, list):
+        interests = []
+
+    category = (row["category"] or "").strip()
+    if category and not any(
+        str(interest).strip().lower() == category.lower()
+        for interest in interests
+    ):
+        interests.append(category)
+
+    if category:
+        cur.execute("""
+            SELECT id FROM analytics
+            WHERE subscriber_id <=> %s AND interest = %s AND platform = %s
+            FOR UPDATE
+        """, (analytics_subscriber_id, category, platform))
+        existing = cur.fetchone()
+        if existing:
+            cur.execute("""
+                UPDATE analytics
+                SET click_count = click_count + 1, last_clicked_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (existing["id"],))
+        else:
+            cur.execute("""
+                INSERT INTO analytics
+                    (subscriber_id, interest, platform, click_count, last_clicked_at)
+                VALUES (%s, %s, %s, 1, CURRENT_TIMESTAMP)
+            """, (analytics_subscriber_id, category, platform))
+    if subscriber_id:
+        cur.execute("""
+            UPDATE subscribers
+            SET interests = %s
+            WHERE id = %s
+        """, (json.dumps(interests), subscriber_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return row["url"]
+
+def get_article_url(article_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT url FROM articles WHERE id = %s", (article_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row[0] if row else None
 
 def add_subscriber(name, email, contact_no, interests):
     conn = get_connection()
@@ -241,6 +358,15 @@ def get_subscriber_emails(active_only=True):
     cur.close()
     conn.close()
     return rows
+
+def get_subscriber_id_by_email(email):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM subscribers WHERE email = %s", (email,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row[0] if row else None
 
 def unsubscribe_subscriber(user_id):
     conn = get_connection()

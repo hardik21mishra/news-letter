@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.utils import parsedate_to_datetime
 from datetime import datetime
 
-from db import get_marked_articles, get_subscriber_emails
+from db import get_selected_articles, get_subscriber_emails
 from premailer import transform
 
 from dotenv import load_dotenv
@@ -15,12 +15,6 @@ load_dotenv()
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 
-# Temporarily disabled to allow the scheduled newsletter job to run before the app is publicly deployed.
-# Once the backend is live, set BASE_URL to the public app URL, e.g. https://newsletter.example.com
-# BASE_URL = os.getenv(
-#     "BASE_URL",
-#     "http://127.0.0.1:8000"
-# )
 BASE_URL = os.getenv("BASE_URL") or "http://127.0.0.1:8000"
 
 HTML_HEAD = """<!DOCTYPE html>
@@ -121,7 +115,7 @@ def format_article_date(raw_date):
 
     return ""
 
-def build_news_body(articles, recipient_email, subscriber_id):
+def build_news_body(articles, recipient_email, subscriber_id, platform="email"):
     current_time = datetime.now()
     send_date_str = current_time.strftime("%B %d, %Y")
 
@@ -166,7 +160,16 @@ def build_news_body(articles, recipient_email, subscriber_id):
             continue
 
         url = article.get("url") or "#"
-        category = (article.get("category") or "TECH").upper()
+        article_id = article.get("id")
+        tracking_url = (
+            f"{BASE_URL}/track/{subscriber_id or 0}/{article_id}?platform={platform}"
+            if BASE_URL and article_id and platform in {"telegram", "discord"}
+            else url
+        )
+        if BASE_URL and article_id and platform == "email" and subscriber_id:
+            tracking_url = f"{BASE_URL}/track/{subscriber_id}/{article_id}?platform=email"
+        category = (article.get("category") or "TECH NEWS").upper()
+        source = (article.get("source") or "UNKNOWN SOURCE")
         summary = (article.get("summary") or "")
         published_date = format_article_date(article.get("published_at"))
         
@@ -175,7 +178,7 @@ def build_news_body(articles, recipient_email, subscriber_id):
         safe_title = escape(str(title))
         safe_category = escape(str(category))
         safe_summary = escape(str(summary))
-        safe_url = escape(str(url), quote=True)
+        safe_url = escape(str(tracking_url), quote=True)
 
         html_content += f"""
                 <tr>
@@ -239,10 +242,11 @@ def send_to_all_subscribers(subject, body, html_email=True):
             server.sendmail(SENDER_EMAIL, email, msg.as_string())
             print(f"Sent '{subject}' to {email}")
 
-def build_newsletter_mails():
-    news_articles = get_marked_articles("news")
-    tech_picks = get_marked_articles("tech_of_week")
-    topic_picks = get_marked_articles("topic_of_week")
+def build_newsletter_mails(selected_articles=None):
+    selected_articles = selected_articles if selected_articles is not None else get_selected_articles()
+    news_articles = [article for article in selected_articles if article["mark_type"] == "news"]
+    tech_picks = [article for article in selected_articles if article["mark_type"] == "tech_of_week"]
+    topic_picks = [article for article in selected_articles if article["mark_type"] == "topic_of_week"]
 
     tech_pick = tech_picks[0] if tech_picks else {}
     topic_pick = topic_picks[0] if topic_picks else {}
@@ -273,6 +277,7 @@ def build_newsletter_mails():
         ))
 
     return [(subject, body, html_email) for subject, body, html_email in mails if body]
+
 
 if __name__ == "__main__":
     if not SENDER_EMAIL or not APP_PASSWORD:
