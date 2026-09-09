@@ -57,6 +57,10 @@ class BroadcastRequest(BaseModel):
 def home():
     return {"message": "Helloooo, this is my news API"}
 
+@app.get("/healthz", status_code=204)
+def keep_alive():
+    return
+
 @app.get("/analytics/overview")
 def analytics_overview(platform: str = "all"):
     platform = platform.lower()
