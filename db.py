@@ -5,6 +5,35 @@ import mysql.connector
 from datetime import datetime, timezone
 import json
 from zoneinfo import ZoneInfo
+from typing import TypedDict, cast
+
+
+class SelectedArticle(TypedDict):
+    """Columns returned by the articles/selections query."""
+
+    id: int
+    title: str | None
+    author: str | None
+    url: str | None
+    published_at: datetime | None
+    source: str | None
+    category: str | None
+    description: str | None
+    summary: str | None
+    fetched_at: str | None
+    mark_type: str
+
+
+class SubscriberEmail(TypedDict):
+    id: int
+    email: str
+
+
+class _ClickArticle(TypedDict):
+    url: str | None
+    category: str | None
+    interests: str | None
+    subscriber_id: int | None
 
 IST = ZoneInfo("Asia/Kolkata")
 
@@ -50,13 +79,14 @@ def get_connection():
 
     # Aiven MySQL requires TLS and a CA certificate for secure connections.
     if host.endswith(".aivencloud.com"):
-        if verify_ssl and not ca_cert_path:
-            raise RuntimeError(
-                "Aiven MySQL requires MYSQL_SSL_CA to be set to the CA certificate file path. "
-                "Add it to your .env or GitHub Actions secrets."
-            )
-        if verify_ssl and "-----BEGIN CERTIFICATE-----" not in ca_cert_path and not os.path.isfile(ca_cert_path):
-            raise RuntimeError(f"MYSQL_SSL_CA file does not exist: {ca_cert_path}")
+        if verify_ssl:
+            if not ca_cert_path:
+                raise RuntimeError(
+                    "Aiven MySQL requires MYSQL_SSL_CA to be set to the CA certificate file path. "
+                    "Add it to your .env or GitHub Actions secrets."
+                )
+            if "-----BEGIN CERTIFICATE-----" not in ca_cert_path and not os.path.isfile(ca_cert_path):
+                raise RuntimeError(f"MYSQL_SSL_CA file does not exist: {ca_cert_path}")
         connect_args.update(
             {
                 "ssl_disabled": False,
@@ -64,7 +94,7 @@ def get_connection():
                 "ssl_verify_identity": verify_ssl,
             }
         )
-        if verify_ssl:
+        if verify_ssl and ca_cert_path:
             connect_args["ssl_ca"] = ca_cert_path
     elif ca_cert_path:
         connect_args.update(
@@ -227,7 +257,7 @@ def get_marked_articles(mark_type, date=None):
 
     return rows
 
-def get_selected_articles():
+def get_selected_articles() -> list[SelectedArticle]:
     today = datetime.now(timezone.utc).date()
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
@@ -239,7 +269,8 @@ def get_selected_articles():
           AND DATE(selections.created_at) = %s
         ORDER BY articles.published_at DESC, articles.fetched_at DESC
     """, (today,))
-    rows = cur.fetchall()
+    # dictionary=True returns mappings; the connector's general types also allow tuples.
+    rows = cast(list[SelectedArticle], cur.fetchall())
     cur.close()
     conn.close()
     return rows
@@ -259,7 +290,7 @@ def track_newsletter_click(subscriber_id, article_id, platform="email"):
         LEFT JOIN subscribers ON subscribers.id = %s
         WHERE articles.id = %s
     """, (subscriber_id, article_id))
-    row = cur.fetchone()
+    row = cast(_ClickArticle | None, cur.fetchone())
     if not row or (platform == "email" and row.get("subscriber_id") is None):
         cur.close()
         conn.close()
@@ -287,7 +318,7 @@ def track_newsletter_click(subscriber_id, article_id, platform="email"):
             WHERE subscriber_id <=> %s AND interest = %s AND platform = %s
             FOR UPDATE
         """, (analytics_subscriber_id, category, platform))
-        existing = cur.fetchone()
+        existing = cast(dict[str, int] | None, cur.fetchone())
         if existing:
             cur.execute("""
                 UPDATE analytics
@@ -311,11 +342,11 @@ def track_newsletter_click(subscriber_id, article_id, platform="email"):
     conn.close()
     return row["url"]
 
-def get_article_url(article_id):
+def get_article_url(article_id) -> str | None:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT url FROM articles WHERE id = %s", (article_id,))
-    row = cur.fetchone()
+    row = cast(tuple[str | None] | None, cur.fetchone())
     cur.close()
     conn.close()
     return row[0] if row else None
@@ -339,7 +370,7 @@ def add_subscriber(name, email, contact_no, interests):
     cur.close()
     conn.close()
 
-def get_subscriber_emails(active_only=True):
+def get_subscriber_emails(active_only=True) -> list[SubscriberEmail]:
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
@@ -354,16 +385,16 @@ def get_subscriber_emails(active_only=True):
             SELECT id, email
             FROM subscribers
         """)
-    rows = cur.fetchall()
+    rows = cast(list[SubscriberEmail], cur.fetchall())
     cur.close()
     conn.close()
     return rows
 
-def get_subscriber_id_by_email(email):
+def get_subscriber_id_by_email(email) -> int | None:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT id FROM subscribers WHERE email = %s", (email,))
-    row = cur.fetchone()
+    row = cast(tuple[int] | None, cur.fetchone())
     cur.close()
     conn.close()
     return row[0] if row else None
