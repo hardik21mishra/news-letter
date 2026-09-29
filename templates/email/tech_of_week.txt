@@ -1,0 +1,7 @@
+TECH OF THE WEEK
+
+{title}
+
+{description}
+
+Link: {link}
