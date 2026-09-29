@@ -3,6 +3,21 @@
 This project is a Python-based newsletter system that collects technical news from RSS feeds, processes the articles, and prepares a newsletter for subscribers.
 The main focus is on AI, software development, cloud, infrastructure, and other technology-related topics. Articles are collected automatically, but the final selection is still reviewed manually through Google Sheets.
 
+For a beginner-friendly walkthrough of the files, data flow, and review findings, see [Project flow and maintenance](docs/project_flow.md).
+
+## Editing feeds and email content
+
+- `config/feeds.json` contains the RSS feed URLs and their source names. Its entry order is the fetching order. The original 48 entries are preserved.
+- `templates/email/head.html` contains the email document opening and CSS.
+- `templates/email/intro.html` contains the newsletter heading, greeting, date, and history block.
+- `templates/email/article.html` contains the repeated article layout.
+- `templates/email/footer.html` contains the footer and unsubscribe links.
+- `templates/email/tech_of_week.txt` and `templates/email/topic_of_week.txt` contain the weekly plain-text email bodies.
+
+Keep placeholders such as `{safe_title}` and `{unsubscribe_url}` intact when editing templates. Python supplies their values. The HTML fragments are combined by `send_email.py`; they are not standalone pages. In templates with placeholders, use `{{` and `}}` for literal braces. `head.html` is loaded as plain text, so its CSS uses normal braces.
+
+Include both `config/` and `templates/` when copying or deploying this project. These files are loaded when the Python modules are first imported; restart a running API after editing them. No additional packages or environment variables are needed for this separation.
+
 ## How it works
 
 The project is split into two main pipelines.

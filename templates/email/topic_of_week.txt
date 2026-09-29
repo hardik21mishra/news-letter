@@ -1,0 +1,7 @@
+TOPIC OF THE WEEK
+
+{title}
+
+{description}
+
+Link: {link}

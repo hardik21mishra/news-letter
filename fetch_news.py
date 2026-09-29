@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import feedparser
 from bs4 import BeautifulSoup
 import re
@@ -6,64 +8,10 @@ from datetime import timezone
 from zoneinfo import ZoneInfo
 from email.utils import parsedate_to_datetime
 
-feed_links = {
-    "https://www.infoq.com/feed/": "InfoQ",
-    "https://martinfowler.com/feed.atom": "Martin Fowler",
-    "https://lwn.net/headlines/rss": "LWN.net",
-    "https://netflixtechblog.com/feed": "Netflix TechBlog",
-    "https://blog.cloudflare.com/rss/": "Cloudflare Blog",
-    "https://code.fb.com/feed/": "Meta Engineering",
-    "https://github.blog/feed/": "GitHub Blog",
-
-    "https://dropbox.tech/feed": "Dropbox Tech",
-    "https://stripe.com/blog/feed.rss": "Stripe Engineering",
-    "https://engineering.atspotify.com/feed/": "Spotify Engineering",
-    "https://engineering.salesforce.com/feed/": "Salesforce Engineering",
-
-    "https://aws.amazon.com/blogs/aws/feed/": "AWS",
-    "https://www.cncf.io/feed/": "CNCF",
-    "https://kubernetes.io/feed.xml": "Kubernetes",
-    "https://istio.io/latest/feed.xml": "Istio",
-    "https://www.hashicorp.com/blog/feed.xml": "HashiCorp",
-    "https://www.elastic.co/blog/feed": "Elastic",
-    "https://thenewstack.io/feed/": "The New Stack",
-
-    "https://openai.com/news/rss.xml": "OpenAI",
-    "https://huggingface.co/blog/feed.xml": "Hugging Face",
-    "https://research.google/blog/rss/": "Google Research",
-    "https://engineering.fb.com/category/ai/feed/": "Meta AI Engineering",
-    "https://developer.nvidia.com/blog/feed": "NVIDIA",
-
-    "https://www.timescale.com/blog/rss/": "TimescaleDB",
-    "https://planet.postgresql.org/rss20.xml": "Planet PostgreSQL",
-    "https://redis.com/feed/": "Redis",
-    "https://www.mongodb.com/blog/rss": "MongoDB",
-
-    "https://googleprojectzero.blogspot.com/feeds/posts/default": "Google Project Zero",
-    "https://feeds.feedburner.com/TheHackersNews": "The Hacker News",
-    "https://www.schneier.com/feed/atom/": "Schneier on Security",
-
-    "https://go.dev/blog/feed.atom": "Go Blog",
-    "https://blog.rust-lang.org/feed.xml": "Rust Blog",
-    "https://v8.dev/blog.atom": "V8 JavaScript Engine",
-    "https://developer.chrome.com/feed.xml": "Chrome Developers",
-    "https://webkit.org/feed/": "WebKit",
-    "https://planet.kernel.org/rss20.xml": "Planet Kernel",
-    "https://planet.python.org/rss20.xml": "Planet Python",
-
-    "https://medium.com/feed/tag/artificial-intelligence": "Medium",
-    "https://medium.com/feed/tag/machine-learning": "Medium",
-    "https://blog.jetbrains.com/feed/": "JetBrains Blog",
-    "https://unit42.paloaltonetworks.com/feed/": "Palo Alto Unit 42",
-    "https://medium.com/feed/tag/software-engineering": "Medium",
-    "https://medium.com/feed/tag/cloud-computing": "Medium",
-    "https://medium.com/feed/tag/devops": "Medium",
-    "https://medium.com/feed/tag/kubernetes": "Medium",
-    "https://medium.com/feed/tag/data-engineering": "Medium",
-    "https://medium.com/feed/tag/cybersecurity": "Medium",
-
-    "https://rss.slashdot.org/Slashdot/slashdotMain": "Slashdot",
-}
+# Keep feed URLs and source labels in config/feeds.json, in fetching order.
+feed_links = json.loads(
+    (Path(__file__).resolve().parent / "config" / "feeds.json").read_text(encoding="utf-8")
+)
 
 IST = ZoneInfo("Asia/Kolkata")
 
