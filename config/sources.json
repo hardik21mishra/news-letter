@@ -1,0 +1,75 @@
+{
+    "selection": {
+        "max_articles": 60,
+        "max_articles_per_source": 12,
+        "max_rss_articles_per_publisher": 3
+    },
+    "network": {
+        "connect_timeout_seconds": 3,
+        "read_timeout_seconds": 8,
+        "request_timeout_seconds": 15,
+        "max_response_bytes": 3000000,
+        "max_description_chars": 6000
+    },
+    "rss": {
+        "enabled": true,
+        "max_response_bytes": 15000000,
+        "entries_per_feed": 15,
+        "max_articles_per_feed": 4,
+        "max_articles": 80,
+        "max_age_days": 2,
+        "time_budget_seconds": 120
+    },
+    "medium": {
+        "enabled": true,
+        "entries_per_feed": 15,
+        "max_articles_per_feed": 4,
+        "max_articles": 40,
+        "max_age_days": 2,
+        "time_budget_seconds": 45
+    },
+    "hacker_news": {
+        "enabled": true,
+        "max_items_to_check": 80,
+        "max_articles": 20,
+        "min_score": 30,
+        "max_age_days": 2,
+        "time_budget_seconds": 90,
+        "keywords": [
+            "AI", "LLM", "machine learning", "neural", "model", "inference",
+            "software", "programming", "developer", "compiler", "database", "SQL",
+            "Python", "Rust", "JavaScript", "TypeScript", "WebAssembly", "Linux",
+            "kernel", "open source", "GitHub", "API", "cloud", "Kubernetes",
+            "security", "vulnerability", "encryption", "GPU", "CPU", "chip",
+            "network", "browser", "robot", "robotics"
+        ]
+    },
+    "github": {
+        "enabled": true,
+        "projects": [
+            "astral-sh/uv",
+            "rust-lang/rust",
+            "kubernetes/kubernetes",
+            "pytorch/pytorch",
+            "huggingface/transformers",
+            "ollama/ollama"
+        ],
+        "releases_per_project": 5,
+        "max_articles_per_project": 1,
+        "max_articles": 6,
+        "max_age_days": 2,
+        "time_budget_seconds": 30
+    },
+    "arxiv": {
+        "enabled": true,
+        "categories": ["cs.AI", "cs.LG", "cs.CL"],
+        "keywords": [
+            "language model", "language models", "LLM", "LLMs", "multimodal",
+            "retrieval", "reasoning", "inference", "agent", "agents"
+        ],
+        "max_results": 80,
+        "max_articles": 20,
+        "max_age_days": 2,
+        "time_budget_seconds": 20
+    }
+}

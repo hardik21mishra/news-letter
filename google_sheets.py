@@ -3,6 +3,7 @@
 # to send and receive from the curator
 import os
 import json
+from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import gspread
@@ -17,7 +18,6 @@ load_dotenv()
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
           "https://www.googleapis.com/auth/drive"]
 
-ARTICLE_LIMIT = 200
 IST = ZoneInfo("Asia/Kolkata")
 
 def get_sheet_id():
@@ -53,6 +53,10 @@ def download_sheet_xlsx():
 def export_articles_to_sheet():
     """Overwrites the sheet with today's fetched articles + empty Mark column."""
 
+    # Share the fetching review ceiling, including when today's rows span several runs.
+    article_limit = json.loads(
+        (Path(__file__).resolve().parent / "config" / "sources.json").read_text(encoding="utf-8")
+    )["selection"]["max_articles"]
     # fetch_sum_save() # --> runs the fetch file before 
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
@@ -66,7 +70,7 @@ def export_articles_to_sheet():
                     AND TRIM(summary) <> ''
         ORDER BY published_at DESC
         LIMIT %s
-        """, (today, ARTICLE_LIMIT))
+        """, (today, article_limit))
     rows = cur.fetchall()
     cur.close()
     conn.close()
